@@ -1,0 +1,2056 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Investment Advisor · Case study · Company X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>/* ---------- tokens ---------- */
+:root{
+  --bg:#F6F6FA;
+  --surface:#FFFFFF;
+  --surface-2:#EEEEF5;
+  --line:#E3E3EC;
+  --ink:#0D0722;
+  --ink-2:#4F4E63;
+  --ink-3:#8A899B;
+  --indigo:#4B31E0;
+  --indigo-deep:#2F1AAE;
+  --indigo-soft:#EEEBFE;
+  --indigo-mid:#B4A6F9;
+  --lime:#C3F53C;
+  --lime-deep:#85AF15;
+  --lime-soft:#F1FCCB;
+  --gain:#2BAA63;
+  --loss:#DC4444;
+  --warn:#B8860B;
+  --warn-soft:#FFF4D6;
+  --gold:#C9A227;
+  --gold-soft:#FBF3D8;
+  --frac:#4B31E0;
+  --tok:#0E9F8E;
+  --tok-soft:#DDF5F1;
+  --font:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#E6E6EF;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{overflow:hidden}
+
+/* ---------- stage ---------- */
+#stage{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0;}
+.slide{position:absolute;inset:0;background:var(--bg);padding:104px 128px 96px;display:none;overflow:hidden}
+.slide.active{display:block}
+.slide.dark{background:var(--ink);color:#fff}
+.slide.dark .kicker{color:var(--indigo-mid)}
+.slide.dark .lead,.slide.dark .sub,.slide.dark .cap,.slide.dark p{color:#C9C7DA}
+.slide.dark h1,.slide.dark h2{color:#fff}
+.slide.indigo{background:var(--indigo);color:#fff}
+.slide.indigo .kicker{color:var(--lime)}
+.slide.indigo h1,.slide.indigo h2{color:#fff}
+.slide.indigo .lead,.slide.indigo p{color:#E4DFFF}
+
+/* chrome */
+.kicker{position:absolute;left:128px;top:56px;font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo)}
+.kicker b{font-family:var(--mono);font-weight:500;margin-right:14px;opacity:.7}
+.pageno{position:absolute;right:128px;bottom:44px;font-family:var(--mono);font-size:14px;color:var(--ink-3)}
+.brand{position:absolute;left:128px;bottom:44px;font-size:14px;color:var(--ink-3);font-weight:500}
+.slide.dark .pageno,.slide.dark .brand,.slide.indigo .pageno,.slide.indigo .brand{color:rgba(255,255,255,.45)}
+#progress{position:fixed;left:0;top:0;height:5px;background:var(--indigo);z-index:10;transition:width .25s ease}
+#hint{position:fixed;right:20px;bottom:16px;color:rgba(13,7,34,.45);font:500 12px var(--font);z-index:10;letter-spacing:.04em}
+
+/* ---------- type ---------- */
+h1{font-size:64px;line-height:1.08;font-weight:700;letter-spacing:-.025em;max-width:1400px}
+h1.xl{font-size:88px;letter-spacing:-.03em;max-width:1500px}
+h1.md{font-size:52px}
+h2{font-size:34px;line-height:1.2;font-weight:700;letter-spacing:-.015em}
+h3{font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.3}
+.lead{font-size:28px;line-height:1.45;color:var(--ink-2);max-width:1240px;margin-top:28px;font-weight:400}
+.lead.sm{font-size:23px;max-width:1100px}
+.sub{font-size:20px;line-height:1.5;color:var(--ink-2)}
+p{font-size:19px;line-height:1.5;color:var(--ink-2)}
+small,.cap{font-size:15px;line-height:1.45;color:var(--ink-3)}
+.hl{background:linear-gradient(transparent 58%,var(--lime) 58%);padding:0 .08em}
+.slide.dark .hl,.slide.indigo .hl{background:linear-gradient(transparent 60%,rgba(195,245,60,.35) 60%)}
+.ind{color:var(--indigo)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+.mt1{margin-top:12px}.mt2{margin-top:24px}.mt3{margin-top:40px}.mt4{margin-top:64px}
+.tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:var(--indigo-soft);color:var(--indigo)}
+.tag.lime{background:var(--ink);color:var(--lime)}
+.links{display:flex;flex-direction:column;gap:12px}
+.links>div{display:flex;align-items:baseline;gap:18px;font-size:18px}
+.links .l{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);min-width:230px}
+.links a{color:var(--indigo);font-weight:600;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;word-break:break-all}
+.ba{display:inline-block;font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:8px 16px;border-radius:999px;margin-bottom:12px}
+.ba.before{background:#FDE7E7;color:var(--loss)}
+.ba.after{background:#E2F6EA;color:var(--gain)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.loss{background:#FDE7E7;color:var(--loss)}
+.tag.gain{background:#E2F6EA;color:var(--gain)}
+.tag.grey{background:var(--surface-2);color:var(--ink-2)}
+.tag.gold{background:var(--gold-soft);color:#8A6E12}
+.tag.tok{background:var(--tok-soft);color:var(--tok)}
+
+/* ---------- layouts ---------- */
+.body{position:relative;height:100%;display:flex;flex-direction:column}
+.center{justify-content:center}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:96px;height:100%;align-items:center}
+.split.wide-left{grid-template-columns:1.25fr 1fr}
+.split.wide-right{grid-template-columns:1fr 1.25fr}
+.split.top{align-items:start}
+.cols{display:grid;gap:32px;margin-top:44px}
+.cols.c2{grid-template-columns:repeat(2,1fr)}
+.cols.c3{grid-template-columns:repeat(3,1fr)}
+.cols.c4{grid-template-columns:repeat(4,1fr)}
+.cols.c5{grid-template-columns:repeat(5,1fr)}
+.cols.c6{grid-template-columns:repeat(6,1fr)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:32px 34px;position:relative}
+.card h3{margin-bottom:12px}
+.card p{font-size:18px}
+.card .n{font-family:var(--mono);font-size:14px;color:var(--ink-3);margin-bottom:16px;display:block}
+.card.soft{background:var(--indigo-soft);border-color:transparent}
+.card.lime{background:var(--lime-soft);border-color:transparent}
+.card.ink{background:var(--ink);color:#fff;border-color:transparent}
+.card.ink p,.card.ink h3,.card.ink .n{color:#fff}
+.card.ink p{color:#C9C7DA}
+.card.ghost{background:transparent;border:1.5px dashed var(--line)}
+.slide.dark .card{background:#181233;border-color:#2A2350}
+.slide.dark .card p{color:#C9C7DA}
+.slide.dark .card h3{color:#fff}
+
+.stat{display:flex;flex-direction:column;gap:8px}
+.stat .v{font-size:72px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:18px;color:var(--ink-2)}
+
+.quote{font-size:38px;line-height:1.3;font-weight:600;letter-spacing:-.01em;max-width:1300px}
+.quote.sm{font-size:28px;font-weight:500}
+.quote:before{content:'\201C';color:var(--indigo);margin-right:2px}
+.quote:after{content:'\201D';color:var(--indigo)}
+.quote-src{margin-top:18px;font-size:16px;color:var(--ink-3)}
+.slide.indigo .quote:before,.slide.indigo .quote:after,.slide.dark .quote:before,.slide.dark .quote:after{color:var(--lime)}
+.phone.xs{width:250px;border-radius:32px;padding:8px}
+.phone.xs img{border-radius:24px}
+
+ul.list{list-style:none;display:flex;flex-direction:column;gap:14px}
+ul.list li{font-size:21px;line-height:1.45;color:var(--ink-2);padding-left:34px;position:relative}
+ul.list li:before{content:'';position:absolute;left:0;top:13px;width:14px;height:6px;border-radius:3px;background:var(--lime)}
+ul.list.sm li{font-size:18px;gap:10px}
+ul.list.ind li:before{background:var(--indigo)}
+ul.check li:before{content:'✓';background:none;color:var(--gain);top:0;font-weight:700;width:auto;height:auto}
+ul.cross li:before{content:'×';background:none;color:var(--loss);top:0;font-weight:700;width:auto;height:auto;font-size:24px;line-height:1.2}
+
+table{width:100%;border-collapse:collapse;font-size:17px;line-height:1.4}
+th{text-align:left;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:0 16px 14px 16px;border-bottom:1.5px solid var(--line)}
+td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+td:first-child,th:first-child{padding-left:0}
+td:first-child{color:var(--ink);font-weight:600}
+table.dense{font-size:15px}
+table.dense td{padding:10px 12px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.pill.s{background:#E2F6EA;color:var(--gain)}
+.pill.a{background:var(--indigo-soft);color:var(--indigo)}
+.pill.w{background:var(--warn-soft);color:var(--warn)}
+.pill.m{background:#FDE7E7;color:var(--loss)}
+.pill.g{background:var(--surface-2);color:var(--ink-2)}
+
+/* phone frame */
+.phone{width:372px;aspect-ratio:430/932;border-radius:44px;background:#08080F;padding:10px;box-shadow:0 30px 60px -20px rgba(13,7,34,.35),0 0 0 1px rgba(13,7,34,.08);position:relative;flex:none}
+.phone img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:36px;display:block}
+.phone.sm{width:300px}
+.phone.lg{width:400px}
+.phone.tall{aspect-ratio:auto;height:100%}
+.phone.tall img{height:100%}
+.phones{display:flex;gap:40px;align-items:flex-start;justify-content:center}
+.figure{display:flex;flex-direction:column;gap:16px;align-items:center}
+.figure .cap{text-align:center;max-width:372px}
+.figure .ba{margin-bottom:0}
+.shot{border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 60px -30px rgba(13,7,34,.3);background:#fff}
+.shot img{display:block;width:100%}
+.callouts{display:flex;flex-direction:column;gap:22px}
+.callout{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start}
+.callout .dot{width:36px;height:36px;border-radius:50%;background:var(--indigo);color:#fff;font:700 15px var(--mono);display:flex;align-items:center;justify-content:center}
+.callout h3{font-size:20px;margin-bottom:4px}
+.callout p{font-size:17px}
+
+/* video slot */
+.video{width:100%;aspect-ratio:16/9;border-radius:24px;overflow:hidden;background:var(--ink);position:relative;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 40px 80px -30px rgba(13,7,34,.5)}
+.video video,.video iframe{width:100%;height:100%;border:0;display:block}
+.video .ph{text-align:center;padding:40px}
+.video .ph .play{width:88px;height:88px;border-radius:50%;background:var(--lime);display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+.video .ph .play:after{content:'';border-left:26px solid var(--ink);border-top:16px solid transparent;border-bottom:16px solid transparent;margin-left:6px}
+.video .ph h3{font-size:24px;color:#fff}
+.video .ph p{color:#9A9AAB;font-size:16px;margin-top:8px;font-family:var(--mono)}
+.video.portrait{aspect-ratio:9/16;width:auto;height:100%}
+
+/* flow diagram */
+.flow{display:flex;align-items:center;gap:0;margin-top:40px}
+.flow .step{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px 22px;min-height:140px}
+.flow .step .n{font-family:var(--mono);font-size:13px;color:var(--ink-3);display:block;margin-bottom:10px}
+.flow .step h3{font-size:19px;margin-bottom:6px}
+.flow .step p{font-size:15px}
+.flow .arrow{width:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:22px}
+.flow .step.hi{background:var(--indigo);border-color:transparent}
+.flow .step.hi h3,.flow .step.hi p,.flow .step.hi .n{color:#fff}
+.flow .step.hi p{color:#E4DFFF}
+.flow .step.lime{background:var(--lime-soft);border-color:transparent}
+
+/* timeline / bars */
+.bar{height:12px;border-radius:6px;background:var(--surface-2);position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--indigo)}
+.bar.lime i{background:var(--lime-deep)}
+.bar.loss i{background:var(--loss)}
+
+.heat{display:grid;gap:6px}
+.cell{border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;text-align:center}
+.cell.s{background:#CDEFD9;color:#1E8049}
+.cell.a{background:var(--indigo-soft);color:var(--indigo)}
+.cell.w{background:var(--warn-soft);color:var(--warn)}
+.cell.m{background:#FBDADA;color:var(--loss)}
+.cell.h{background:transparent;text-align:left;font-weight:600;color:var(--ink);padding-left:0;font-size:16px}
+.cell.hh{background:transparent;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+
+/* diagram */
+.diagram{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.diagram .box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;font-size:15px;line-height:1.45;color:var(--ink-2)}
+.diagram .box b{display:block;color:var(--ink);font-size:17px;margin-bottom:4px}
+.diagram .box.hi{background:var(--indigo-soft);border-color:transparent}
+.diagram .box.hi b{color:var(--indigo)}
+.diagram .box.dark{background:var(--ink);border-color:transparent;color:#C9C7DA}
+.diagram .box.dark b{color:#fff}
+code{font-family:var(--mono);font-size:.92em;background:var(--surface-2);padding:2px 7px;border-radius:6px;color:var(--ink)}
+.card.ink code{background:rgba(255,255,255,.12);color:#fff}
+.slide.dark .stat .l,.slide.indigo .stat .l{color:#C9C7DA}
+.slide.dark ul.list li,.slide.indigo ul.list li{color:#E4DFFF}
+.slide.dark td,.slide.dark th{color:#C9C7DA;border-color:#2A2350}
+.slide.dark td:first-child{color:#fff}
+.slide.indigo .card .n{color:#C3F53C}
+.two-line{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.badge{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--ink-2)}
+.badge i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.persona{display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:start}
+.persona .av{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:#fff;background:var(--indigo)}
+.persona h3{margin-bottom:2px}
+.persona .role{font-size:14px;color:var(--ink-3);font-family:var(--mono);margin-bottom:10px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:var(--surface)}
+.compare>div{padding:32px 36px}
+.compare>div:first-child{border-right:1px solid var(--line);background:var(--surface-2)}
+.compare h3{margin-bottom:12px}
+.compare .lbl{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;display:block}
+
+.section-num{font-family:var(--mono);font-size:18px;color:var(--indigo);letter-spacing:.12em;margin-bottom:28px;font-weight:500}
+
+/* light chapter divider */
+.slide.divider{background:var(--indigo-soft)}
+.slide.divider .kicker{color:var(--indigo)}
+.divider .body{display:grid;grid-template-columns:260px 1fr;gap:64px;align-items:center;height:100%}
+.divider .bignum{font-family:var(--mono);font-size:200px;line-height:1;font-weight:500;color:var(--indigo);letter-spacing:-.04em}
+.divider .bignum small{display:block;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);opacity:.7;margin-top:8px;font-family:var(--font);font-weight:600}
+.divider h1{font-size:76px;letter-spacing:-.03em;max-width:1300px}
+.bridge{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:44px;max-width:1300px}
+.bridge div{background:rgba(255,255,255,.7);border-radius:20px;padding:22px 26px}
+.bridge .l{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px;display:block}
+.bridge p{font-size:20px;line-height:1.45;color:var(--ink)}
+
+/* contents */
+.toc{display:grid;grid-template-columns:repeat(5,1fr);gap:28px;margin-top:44px}
+.toc .col{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:26px 26px 18px}
+.toc .col h3{font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px}
+.toc .col div{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:baseline;font-size:17px;font-weight:600;color:var(--ink);padding:10px 0;border-top:1px solid var(--line);line-height:1.3}
+.toc .col div b{font-family:var(--mono);font-weight:500;color:var(--ink-3);font-size:13px}
+.toc .col div span{display:block;grid-column:2;font-size:13px;font-weight:400;color:var(--ink-2);margin-top:-4px;line-height:1.3}
+
+.notes{display:none}
+#notesbox{position:fixed;left:0;right:0;bottom:0;background:rgba(13,7,34,.94);color:#fff;font-size:18px;line-height:1.5;padding:24px 48px;display:none;z-index:20;max-height:34vh;overflow:auto}
+#notesbox.show{display:block}
+#notesbox b{color:var(--lime)}
+
+/* print */
+@media print{
+  html,body{background:#fff;overflow:visible;height:auto}
+  #progress,#hint,#notesbox{display:none!important}
+  @page{size:1920px 1080px;margin:0}
+  html,body{margin:0;padding:0;width:1920px}
+  #stage{position:static;transform:none!important;margin:0!important;width:1920px;height:auto;left:0;top:0}
+  .slide{display:block!important;position:relative;width:1920px;height:1080px;margin:0;page-break-after:always;break-after:page;overflow:hidden}
+  .slide:last-child{page-break-after:auto;break-after:auto}
+}
+.logos{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logos>div{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid rgba(13,7,34,.08);border-radius:14px;padding:14px 22px;font-size:20px;font-weight:700;color:var(--ink)}
+.logos>div img{width:34px;height:34px}
+.logos.excluded>div{padding:8px 14px;font-size:15px;font-weight:600;color:var(--ink-3);background:transparent;border-style:dashed}
+.logos.excluded>div img{width:20px;height:20px;opacity:.55;filter:grayscale(1)}
+.logos.excluded .l{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-right:6px}
+.logos.excluded .why{font-size:15px;color:var(--ink-3);margin-left:6px}
+.logos.mini{gap:10px;margin-top:18px}
+.logos.mini>div{padding:8px 14px;font-size:15px;gap:8px}
+.logos.mini>div img{width:22px;height:22px}
+</style>
+<script>// Videos shown in the deck. Either a local file inside dist/assets/video/ or a YouTube / Loom / Vimeo link.
+// Leave a value empty ("") to keep the placeholder.
+window.VIDEOS = {
+  hook: "assets/video/hook.mp4",    // 30s product clip, shown near the start
+  astra: "assets/video/astra.mp4",  // GPT Astra live-testing the prototype, synthetic testing chapter
+  demo: ""                          // full walkthrough (optional), shown in the prototype section
+};
+</script>
+</head><body>
+<div id="progress"></div>
+<div id="stage">
+<!-- 1 · Title -->
+<section class="slide nobrand">
+  <div class="split wide-left">
+    <div>
+      <div class="tag" style="width:max-content">Senior Product Designer · Case study</div>
+      <h1 class="xl mt3" style="font-size:92px">AI-powered Investment Advisor</h1>
+      <p class="lead" style="font-size:30px;color:var(--ink);margin-top:20px">By Bisma Munawar</p>
+      <p class="lead sm" style="margin-top:28px">My complete AI-native flow for building an AI product: research, strategy, PRD, brand, design system, prototype, UX audit and synthetic user testing.</p>
+      <div style="display:flex;gap:56px;margin-top:56px;color:var(--ink-3);font-size:17px">
+        <div><span style="color:var(--ink);font-weight:600">Client</span><br>Company X, anonymised</div>
+      </div>
+    </div>
+    <div class="phones"><div class="figure"><div class="phone"><img src="assets/user/u_rec_grid.png" alt="Recommendation card"></div></div></div>
+  </div>
+  <div class="notes"><b>Open warmly.</b> "I'm going to walk you through this the way it actually happened, in order. First, here's the product I ended up with, then we go back to the start."</div>
+</section>
+
+<!-- 2 · The product in one line -->
+<section class="slide" data-sec="01 The product"><div class="kicker"><b>01</b>The product</div>
+  <div class="split wide-left">
+    <div>
+      <h1 class="md">Let me start with what I built, so the rest makes sense</h1>
+      <p class="lead sm">A beginner opens Company X's app and sees three ways to invest: gold, tokenised property and fractional property. The advisor asks them how much money they have and when they'll need it back. Then it recommends one option for <em>that</em> money, explains why the other two lost, shows the cost in dirhams, and lets them invest right there. And if the money shouldn't be invested at all, it says so.</p>
+      <div class="cols c3" style="margin-top:44px;gap:24px">
+        <div class="stat"><div class="v num">4</div><div class="l">questions, at most</div></div>
+        <div class="stat"><div class="v num">1</div><div class="l">recommendation, with the reasoning</div></div>
+        <div class="stat"><div class="v num">0</div><div class="l">KYC steps before you get advice</div></div>
+      </div>
+      <div class="mt3" style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="tag grey">Hybrid: guided flow + chat</span><span class="tag grey">Rules decide, AI explains</span><span class="tag grey">Costs in AED</span><span class="tag grey">Split and “not now” outcomes</span><span class="tag grey">Portfolio-aware, with consent</span>
+      </div>
+      <div class="links mt3">
+        <div><span class="l">Fully wired prototype</span><a href="https://investmentadvisordxb.lovable.app/" target="_blank" rel="noopener">https://investmentadvisordxb.lovable.app/</a></div>
+        <div><span class="l">Design system at Lovable</span><a href="https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ" target="_blank" rel="noopener">https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ</a></div>
+      </div>
+    </div>
+    <div class="phones">
+      <div class="figure"><div class="phone"><img src="assets/user/u_rec_grid.png" alt="Recommendation card"></div><div class="cap">AED 20,000 for 5 years: fractional property, with what you'd own, why, and the cost on one card.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Video hook -->
+<section class="slide" data-sec="01 The product"><div class="kicker"><b>01</b>The product</div>
+  <div class="body">
+    <h2>Thirty seconds of the real thing</h2>
+    <p class="sub mt1">A quick look at the working prototype before we go back to the beginning.</p>
+    <div class="video portrait mt3" data-key="hook" data-poster="assets/video/hook_poster.jpg" style="margin-left:auto;margin-right:auto;height:800px">
+      <div class="ph"><div class="play"></div><h3>Short product clip</h3></div>
+    </div>
+  </div>
+  <div class="notes">Play the short clip. Narrate lightly: amount, questions, recommendation, invest. Live prototype: investmentadvisordxb.lovable.app</div>
+</section>
+
+<!-- 4 · Contents -->
+<section class="slide" data-sec="Contents"><div class="kicker"><b>Contents</b></div>
+  <h1 class="md">What I did, in the order I did it</h1>
+  <p class="sub mt1">Twenty-five steps in five phases. Each one exists because the step before it taught me something. This is the map for the next hour.</p>
+  <div class="toc">
+    <div class="col">
+      <h3>Understand</h3>
+      <div><b>01</b>The brief<span>What Company X asked for</span></div>
+      <div><b>02</b>Defined the problem<span>Every belief labelled as an assumption</span></div>
+      <div><b>03</b>Customer voice research<span>25 quotes, four evidence labels</span></div>
+      <div><b>04</b>What the research changed<span>Who we serve and what they need</span></div>
+    </div>
+    <div class="col">
+      <h3>Strategise</h3>
+      <div><b>05</b>Kano model<span>Basics, performance, delighters</span></div>
+      <div><b>06</b>Competitive landscape<span>My assessment. Facts table in appendix</span></div>
+      <div><b>07</b>The gap<span>What nobody does</span></div>
+      <div><b>08</b>Benchmarks<span>Sarwa and IBKR, screen by screen</span></div>
+      <div><b>09</b>Revised strategy<span>Two things to win on, and the risks</span></div>
+    </div>
+    <div class="col">
+      <h3>Define and build</h3>
+      <div><b>10</b>The PRD<span>States, rules engine, AI contract</span></div>
+      <div><b>11</b>The data loop<span>How it gets better. Data model in appendix</span></div>
+      <div><b>12</b>Brand guidelines<span>Voice, colour, motion</span></div>
+      <div><b>13</b>Design system in Lovable<span>Reused and new primitives</span></div>
+      <div><b>14</b>The prototype<span>Walking the AED 20,000 path</span></div>
+    </div>
+    <div class="col">
+      <h3>Test and improve</h3>
+      <div><b>15</b>UX audit<span>My heuristic pass plus Gemini</span></div>
+      <div><b>16</b>Improvements, round 1<span>Money, engine, review, goals</span></div>
+      <div><b>17</b>Synthetic user panel<span>Six OCEAN-based personas</span></div>
+      <div><b>18</b>Live testing with GPT Astra<span>22 checks on the real prototype, with video</span></div>
+      <div><b>19</b>What testing revealed<span>One critical failure, and what worked</span></div>
+      <div><b>20</b>Improvements, round 2<span>Four design moves, each traced</span></div>
+    </div>
+    <div class="col">
+      <h3>Ship and measure</h3>
+      <div><b>21</b>Product reveal<span>End to end, after both rounds</span></div>
+      <div><b>22</b>Nuanced decisions<span>The smaller things I solved</span></div>
+      <div><b>23</b>Success metrics<span>Five, riding on one table</span></div>
+      <div><b>24</b>Roadmap<span>MVP vs the scaled vision</span></div>
+      <div><b>25</b>Next: real users<span>What only they can answer</span></div>
+    </div>
+  </div>
+  <p class="cap mt2">Reference tables (full competitor table, hypothesis scorecard, all 22 test checks) live in the appendix at the end. Jump there any time.</p>
+</section>
+
+<!-- 5 · The brief -->
+<section class="slide" data-sec="01 The brief"><div class="kicker"><b>01</b>The brief</div>
+  <h1 class="md">Step one. Here's the brief I was given, in its own words</h1>
+  <p class="lead sm">“Imagine a fintech launching an AI-powered investment advisor inside its app. Help everyday retail investors, many with limited financial literacy, get personalised guidance without the cost of a human advisor. It should build engagement and trust, not just be a novelty chatbot.”</p>
+  <div class="cols c5" style="margin-top:56px">
+    <div class="card"><span class="n">Ask 01</span><h3>Define the core need</h3><p>Guidance, trust, literacy, convenience. Be specific.</p></div>
+    <div class="card"><span class="n">Ask 02</span><h3>2 to 4 key screens</h3><p>Requesting advice, the recommendation, how trust and explainability are handled.</p></div>
+    <div class="card"><span class="n">Ask 03</span><h3>A point of view on trust</h3><p>Explainability, transparency, human fallback.</p></div>
+    <div class="card"><span class="n">Ask 04</span><h3>MVP vs scaled vision</h3><p>What ships first, what comes later.</p></div>
+    <div class="card"><span class="n">Ask 05</span><h3>Success in one line</h3><p>Engagement, retention, trust, adoption.</p></div>
+  </div>
+  <p class="cap mt3">I'd be judged on: problem clarity · solution creativity and feasibility · trust and compliance instinct · roadmap thinking · craft.</p>
+  <div class="notes">Read the brief aloud. Point out the phrase "not just a novelty chatbot", it becomes a design decision later (guided flow first, chat second).</div>
+</section>
+
+<!-- 6 · How I read the brief -->
+<section class="slide" data-sec="01 The brief"><div class="kicker"><b>01</b>The brief</div>
+  <h1 class="md">How I read it, and what I decided to do about it</h1>
+  <p class="lead sm">The brief asked for two to four screens. I could have sketched those in a day. But the evaluation criteria were about judgement: is the problem clear, is the AI thoughtful, do I understand trust and compliance. You can't show judgement in four screens. So I treated it like a real feature: research it, decide it, spec it, build it, break it, fix it.</p>
+  <div class="cols c4" style="margin-top:48px">
+    <div class="card soft"><span class="n">Research</span><h3>Customer voice and competitors</h3><p>Desk research across Reddit, Trustpilot, LinkedIn, HN, Indie Hackers, Product Hunt. 13 competitors and workarounds mapped. Every claim tagged evidence, interpretation or assumption.</p></div>
+    <div class="card soft"><span class="n">Strategy</span><h3>Kano model to a strategy</h3><p>Basics to match, performance dimensions to win, two delighters, and a clear list of what we chose not to do.</p></div>
+    <div class="card soft"><span class="n">Spec</span><h3>PRD, data model, design system</h3><p>Three user states, rules engine, AI output contract, trust and compliance constraints, brand guidelines v1.0.</p></div>
+    <div class="card soft"><span class="n">Build and test</span><h3>Wired prototype, audited, tested</h3><p>Lovable prototype with real logic. Heuristic UX audit, then a six-person synthetic panel run live through 22 checks. Two rounds of fixes.</p></div>
+  </div>
+  <p class="cap mt3">Everything is anonymised as Company X. Numbers on screens are prototype demo values, not audited product terms.</p>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">02<small>Defined the problem</small></div>
+    <div>
+      <h1>Before I designed anything, I wrote down what I thought the problem was</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>A brief, a company with three products in its app, and no customer in front of me. Just my own beliefs about who struggles and why.</p></div>
+        <div><span class="l">So I did this</span><p>I wrote the problem statement in full and marked every single line as an assumption. That way, when the research came back, I could see what survived and what didn't.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Problem statement -->
+<section class="slide" data-sec="02 Defined the problem"><div class="kicker"><b>02</b>Defined the problem</div>
+  <h1 class="md">This was my first guess at the problem. Every line here is an assumption <span class="tag warn" style="vertical-align:middle;font-size:15px">Assumption</span></h1>
+  <div class="cols c3" style="margin-top:44px">
+    <div class="card"><span class="n">Who I thought we were serving</span><h3>UAE residents, 22 to 48, with AED 3,000 or more a month to invest</h3><p>Beginners. Either never invested, or less than a year in. Already inside an investment app, but not sure which option is right for them.</p></div>
+    <div class="card"><span class="n">What I thought the problem was</span><h3>They can't choose between gold, tokenised property and fractional property</h3><p>They don't know how the three differ on risk, liquidity, returns, ownership, fees and time horizon, or what those differences mean for their own life. So they research everywhere, ask people, or leave the money in cash.</p></div>
+    <div class="card"><span class="n">What I thought the answer was</span><h3>One clear best-fit recommendation, explained, that you can act on in the app</h3><p>Use what the app already knows plus a short conversation to recommend one option, say why it beats the other two, take follow-up questions, and let the user invest without leaving.</p></div>
+  </div>
+  <div class="card lime mt2" style="padding:24px 34px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center">
+    <span class="tag" style="background:#0D0722;color:#C3F53C">Where this stood</span>
+    <p style="color:#0D0722">A founder-style hypothesis backed by desk reading. I hadn't spoken to a single customer. The segment, the AED 3,000 line, the three-product choice and whether anyone would trust an AI recommendation were all unproven at this point.</p>
+  </div>
+  <div class="notes">Make the point: I wrote the problem down BEFORE research so I could check it against the research afterwards. Tell them to watch what survives.</div>
+</section>
+
+<!-- Existing alternatives -->
+<section class="slide" data-sec="02 Defined the problem"><div class="kicker"><b>02</b>Defined the problem</div>
+  <h1 class="md">I also listed what people do today instead of deciding</h1>
+  <p class="lead sm">This mattered because the real competition here isn't another advisor. It's a browser tab and a WhatsApp group.</p>
+  <div class="cols c5" style="margin-top:48px">
+    <div class="card"><span class="n">Google and Reddit</span><h3>Search</h3><p>Lots of information, most of it conflicting or generic. The user has to work out what applies to them.</p></div>
+    <div class="card"><span class="n">ChatGPT</span><h3>Ask an AI</h3><p>Sounds personal, but it knows nothing verified about you or the products in front of you.</p></div>
+    <div class="card"><span class="n">Friends and family</span><h3>Ask someone</h3><p>Easy and trusted. But it's opinion, and it's not tied to your goals.</p></div>
+    <div class="card"><span class="n">Product pages</span><h3>Compare manually</h3><p>All the facts, and none of the “so what does this mean for me?”</p></div>
+    <div class="card ink"><span class="n">Cash</span><h3>Do nothing</h3><p>Avoids a wrong decision. Probably also the most common outcome.</p></div>
+  </div>
+  <h3 class="mt3">And I wrote down the three questions I'd need real customers to answer</h3>
+  <ul class="list sm mt1">
+    <li>When you have money and can't choose, what do you actually do today, and what makes it hard?</li>
+    <li>Would you trust an AI inside the app to recommend one option, and what would it need to show you first?</li>
+    <li>Would a personalised recommendation make you invest now, rather than leave to keep researching?</li>
+  </ul>
+  <div class="notes">Bridge to next chapter: "I couldn't interview customers inside a case study window. So I went where they already talk."</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">03<small>Customer voice research</small></div>
+    <div>
+      <h1>Then I went looking for the customer's own words</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>I had a problem statement made entirely of assumptions and three open questions that only customers could answer. I had no customers to interview inside the case study window.</p></div>
+        <div><span class="l">So I did this</span><p>I ran deep research on the places where UAE retail investors already talk about money: Reddit, Trustpilot, LinkedIn, Hacker News, Indie Hackers and Product Hunt. I labelled every finding by how much I could trust it.</p></div>
+      </div>
+      <div class="logos mini">
+        <div><img src="assets/logos/reddit.svg" alt="Reddit"><span>Reddit</span></div>
+        <div><img src="assets/logos/trustpilot.svg" alt="Trustpilot"><span>Trustpilot</span></div>
+        <div><img src="assets/logos/linkedin.svg" alt="LinkedIn"><span>LinkedIn</span></div>
+        <div><img src="assets/logos/ycombinator.svg" alt="Hacker News"><span>Hacker News</span></div>
+        <div><img src="assets/logos/indiehackers.svg" alt="Indie Hackers"><span>Indie Hackers</span></div>
+        <div><img src="assets/logos/producthunt.svg" alt="Product Hunt"><span>Product Hunt</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How I researched -->
+<section class="slide" data-sec="03 Customer voice"><div class="kicker"><b>03</b>Customer voice</div>
+  <h1 class="md">Where I looked, and what I left out</h1>
+  <p class="lead sm">I pointed the research at platforms where real customers complain, ask questions and compare products. If I couldn't verify a source, I didn't use it.</p>
+  <div class="logos mt3">
+    <div><img src="assets/logos/reddit.svg" alt="Reddit"><span>Reddit</span></div>
+    <div><img src="assets/logos/trustpilot.svg" alt="Trustpilot"><span>Trustpilot</span></div>
+    <div><img src="assets/logos/linkedin.svg" alt="LinkedIn"><span>LinkedIn</span></div>
+    <div><img src="assets/logos/ycombinator.svg" alt="Hacker News"><span>Hacker News</span></div>
+    <div><img src="assets/logos/indiehackers.svg" alt="Indie Hackers"><span>Indie Hackers</span></div>
+    <div><img src="assets/logos/producthunt.svg" alt="Product Hunt"><span>Product Hunt</span></div>
+  </div>
+  <div class="logos excluded mt2">
+    <span class="l">Searched and excluded</span>
+    <div><img src="assets/logos/quora.svg" alt="Quora"><span>Quora</span></div>
+    <div><img src="assets/logos/g2.svg" alt="G2"><span>G2</span></div>
+    <div><img src="assets/logos/capterra.svg" alt="Capterra"><span>Capterra</span></div>
+    <div><img src="assets/logos/youtube.svg" alt="YouTube"><span>YouTube</span></div>
+    <div><img src="assets/logos/x.svg" alt="X"><span>X</span></div>
+    <span class="why">Either blocked, B2B only, or nothing I could verify as a real customer.</span>
+  </div>
+  <div class="split wide-left top mt3" style="align-items:start;height:auto;gap:64px">
+    <div>
+      <table>
+        <tr><th>Source</th><th>What it gave me</th></tr>
+        <tr><td>Reddit</td><td>The most recent and most direct UAE retail investor voice. The AED 30,000 and AED 320,000 threads, the emergency fund thread, the gold app discussions.</td></tr>
+        <tr><td>Trustpilot</td><td>Customer experience with Stake, SmartCrowd, Sarwa, Wahed and OGold. Read as individual reviews, not as verdicts on a platform.</td></tr>
+        <tr><td>LinkedIn</td><td>Questions about tokenised property: who owns what, how you exit, how it really works.</td></tr>
+        <tr><td>Hacker News · Indie Hackers · Product Hunt</td><td>Adjacent evidence on trust in AI investing tools, ChatGPT workarounds and appetite for simpler products.</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>I gave every finding one of four labels</h3>
+      <div class="callouts mt1">
+        <div class="callout"><div class="dot" style="background:var(--gain)">E</div><div><h3>Evidence</h3><p>Directly supported by customer discussion, reviews, official product information or credible research.</p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--indigo)">I</div><div><h3>Interpretation</h3><p>My reading of what the evidence means.</p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--warn)">A</div><div><h3>Assumption</h3><p>Still a belief. It needs real customers to confirm it.</p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--ink-3)">Adj</div><div><h3>Adjacent evidence</h3><p>Real, but from outside the UAE or about a different product.</p></div></div>
+      </div>
+      <p class="cap mt2">So that later, when we look at any decision in the product, we can trace it back to what it rests on.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Three themes -->
+<section class="slide" data-sec="03 Customer voice"><div class="kicker"><b>03</b>Customer voice</div>
+  <h1 class="md">Three themes came out of it. The first one surprised me</h1>
+  <p class="lead sm">I expected income to be the dividing line. It wasn't. Someone with AED 30,000 and someone with AED 320,000 were asking the exact same question. The hard part is choosing, not affording.</p>
+  <div class="cols c3" style="margin-top:40px;gap:28px">
+    <div>
+      <span class="tag">Theme A · “I have money, what do I do with it?”</span>
+      <div class="card mt2"><p class="quote sm">I have 30,000 AED saved for now… I don't want to keep the money sitting in a savings account.</p><div class="quote-src">Reddit · UAE investor · <span class="pill s">Evidence</span></div></div>
+      <div class="card mt2"><p class="quote sm">Everything feels quite unclear at the moment.</p><div class="quote-src">Reddit · first-time investor with AED 320,000 · <span class="pill s">Evidence</span></div></div>
+    </div>
+    <div>
+      <span class="tag">Theme B · Advice for my situation</span>
+      <div class="card mt2"><p class="quote sm">I've been trying to search for relevant advice, tailored to my situation, but wasn't able to find much.</p><div class="quote-src">Reddit · <span class="pill s">Evidence</span></div></div>
+      <div class="card mt2"><p class="quote sm">A majority of the advice online is tailored towards western nationals.</p><div class="quote-src">Reddit · <span class="pill s">Evidence</span></div></div>
+    </div>
+    <div>
+      <span class="tag lime">Theme C · Liquidity and cost change what “best” means</span>
+      <div class="card mt2"><p class="quote sm">I want to keep the ability to liquidate it, though I also want to invest it.</p><div class="quote-src">Reddit · <span class="pill s">Evidence</span></div></div>
+      <div class="card mt2"><p class="quote sm">Every step has fees.</p><div class="quote-src">Trustpilot · the problem was finding out late, not the cost itself · <span class="pill s">Evidence</span></div></div>
+    </div>
+  </div>
+  <div class="mt3" style="display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1300px">
+    <div><span class="tag grey">What people ask</span><p class="mt1" style="font-size:20px;color:var(--ink)">“What should I invest in?”</p></div>
+    <div><span class="tag">What they actually need (my interpretation)</span><p class="mt1" style="font-size:20px;color:var(--ink)">“Take what matters about me and turn it into a decision.”</p></div>
+  </div>
+  <div class="notes">Also worth saying: "What is S&amp;P 500?" was asked in the same thread where someone had just recommended it. Literacy varies inside a single conversation. All 25 quotes are in the appendix sources table.</div>
+</section>
+
+<!-- What I learned -->
+<section class="slide" data-sec="03 Customer voice"><div class="kicker"><b>03</b>Customer voice</div>
+  <h1 class="md">Then I went back to my problem statement and checked each belief against what I'd found</h1>
+  <p class="lead sm">About half of it held up. The half that didn't is what changed the product.</p>
+  <div class="cols c2" style="margin-top:44px;gap:48px">
+    <div>
+      <h3 style="color:var(--gain)">Supported by the research</h3>
+      <ul class="list check mt1 sm">
+        <li>Beginners who have money ready do struggle to choose</li>
+        <li>Risk, liquidity, fees and time horizon are what drive the decision</li>
+        <li>They research online, ask friends and family, and use ChatGPT</li>
+        <li>They want guidance that applies to their own circumstances</li>
+        <li>People say they want explanations before they'll trust advice</li>
+        <li>An advisor that knows the real products and your real profile has an edge over generic AI</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:var(--warn)">Still not proven</h3>
+      <ul class="list cross mt1 sm">
+        <li>That AED 3,000 a month is the right threshold</li>
+        <li>That 22 to 48 is the right age range</li>
+        <li>That the exact gold vs tokenised vs fractional choice is a common one</li>
+        <li>That people prefer one recommendation over a comparison of three</li>
+        <li>That anyone will act on an AI recommendation with real money</li>
+        <li>That any of this improves conversion or reduces churn</li>
+      </ul>
+    </div>
+  </div>
+  <p class="cap mt3">The full 18-row hypothesis scorecard is in the appendix.</p>
+  <div class="notes">Two numbers worth saying out loud: HSBC found 73% of people use AI for finance but only 12% say it was the most influential factor in their last decision. EY GCC 2025: 71% expect AI, 13% trust it highly. That gap is why trust becomes a whole strategy later, not a slide.</div>
+</section>
+
+<!-- What it changed -->
+<section class="slide" data-sec="04 What the research changed"><div class="kicker"><b>04</b>What the research changed</div>
+  <h1 class="md">Here is what the research changed: who we're building for, and what they need from us</h1>
+  <div class="cols c2" style="margin-top:44px;gap:48px">
+    <div class="card">
+      <span class="n">Who we're building for</span>
+      <h3>People who can't decide, whatever they earn</h3>
+      <p>People already inside the app, with money ready to invest, who have never invested or have less than a year of experience, and who cannot choose between the options in front of them.</p>
+      <div class="mt2" style="display:flex;flex-direction:column;gap:10px">
+        <p><span class="pill m">Dropped</span>&nbsp; The AED 3,000 a month threshold. Competitor minimums start at AED 500 and the problem shows up well above and well below that line.</p>
+        <p><span class="pill s">Kept</span>&nbsp; UAE residence. The products, the regulation and the Shariah question are all local.</p>
+        <p><span class="pill w">Open</span>&nbsp; The 22 to 48 age range. I found nothing that supported it or contradicted it.</p>
+      </div>
+    </div>
+    <div class="card ink">
+      <span class="n">The need, in one sentence</span>
+      <h3 style="font-size:30px;line-height:1.25">Translate the differences between the options into a decision about the money I have right now.</h3>
+      <p class="mt2"><b style="color:#fff">The scope I chose:</b> the money in this session. Not their whole portfolio and not their wealth.</p>
+      <p class="mt1"><b style="color:#fff">Why I chose it:</b> one investor I read had spread about AED 230,000 across 11 fractional properties and said afterwards they wouldn't do it again. Keeping the advice to the current amount is what users need, and it also keeps the product on the suitability side of the regulatory line rather than in financial planning.</p>
+    </div>
+  </div>
+  <div class="notes">Bridge: "Now I knew who I was building for and what they needed. The next question was what a product would have to do to actually win them. So I moved to strategy."</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">05<small>Kano to strategy</small></div>
+    <div>
+      <h1>Then I worked out what the product would have to do to win</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>I knew who I was building for and what they needed. I didn't yet know which of the 27 benefits from the research were expected by everyone, which ones would win, and which ones nobody else was doing.</p></div>
+        <div><span class="l">So I did this</span><p>I sorted the benefits with a Kano model, then benchmarked what the competitors do, then looked at the gap between the two. The strategy came out of that gap. Steps 5 to 9 on the contents page.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Kano -->
+<section class="slide" data-sec="05 Kano model"><div class="kicker"><b>05</b>Kano model</div>
+  <h1 class="md">First, the Kano model. What's expected, what wins, what surprises people</h1>
+  <p class="lead sm">I took the 27 customer benefits from the research and sorted them into three buckets. Ten of them turned out to be basics, which told me this market is already mature. You can't win on a basic, you can only lose on one.</p>
+  <div class="cols c3" style="margin-top:44px">
+    <div class="card"><span class="n">Basic · 10 items</span><h3>Everyone expects these. You get no credit for them, and real damage if they're missing.</h3><ul class="list sm mt1"><li>Full fee disclosure</li><li>Exit route and timing</li><li>Shariah option</li><li>Short question set</li><li>Plain language explanation</li><li>Downside stated clearly</li><li>Sourced product facts</li><li>Invest in the app</li><li>A named accountable party, and control of your data</li></ul></div>
+    <div class="card soft"><span class="n">Performance · where we can compete</span><h3>The more of this you do, the better people like it.</h3><ul class="list ind sm mt1"><li><b>One clear recommendation</b></li><li><b>Explain why the other options lost</b></li><li>Translate product mechanics into personal consequences</li><li>Tokenised vs fractional in practical terms</li><li>Net outcome after fees on <em>my</em> amount</li><li>What would change the recommendation</li><li>A human you can reach at the point of commitment</li></ul></div>
+    <div class="card lime"><span class="n">Delighters · nobody asks for these</span><h3>Not expected, and valued far more than their cost.</h3><ul class="list sm mt1"><li><b>Check what the user already holds before recommending more</b></li><li><b>Recommend against investing when that's the right answer</b></li><li>Let users reject the advice without friction</li><li>Remember the goal and check in on it later <span class="muted">(roadmap)</span></li></ul></div>
+  </div>
+  <p class="cap mt2">Two items I couldn't place cleanly. <b>Showing the reasoning</b> is wanted, but the research doesn't prove it creates trust. <b>Shariah</b> is absolute for some people and irrelevant to others, so I treated it as an early filter rather than a feature. I also borrowed a principle from Graham's The Intelligent Investor: encourage discipline and action, never higher risk.</p>
+</section>
+
+<!-- Assessment heatmap -->
+<section class="slide" data-sec="06 Competitive landscape"><div class="kicker"><b>06</b>Competitive landscape</div>
+  <h1 class="md">Then I benchmarked the competition on the things my research said matter. Two rows stood out</h1>
+  <p class="lead sm">Two fractional property platforms, three robo-advisers, and the tool most people actually use. The scores are my judgement, built on each provider's published facts. The full facts table is in the appendix.</p>
+  <div class="heat mt3" style="grid-template-columns:1.6fr repeat(6,1fr);max-width:1620px">
+    <div class="cell hh"></div><div class="cell hh">Stake</div><div class="cell hh">SmartCrowd</div><div class="cell hh">Sarwa</div><div class="cell hh">StashAway</div><div class="cell hh">Wahed</div><div class="cell hh">ChatGPT</div>
+    <div class="cell h">Recommends one option from a question set</div><div class="cell m">Missing</div><div class="cell m">Missing</div><div class="cell s">Strong</div><div class="cell s">Strong</div><div class="cell s">Strong</div><div class="cell a">Adequate</div>
+    <div class="cell h" style="color:var(--indigo)">Explains why the alternatives were rejected</div><div class="cell m">Missing</div><div class="cell m">Missing</div><div class="cell w">Weak</div><div class="cell w">Weak</div><div class="cell w">Weak</div><div class="cell a">Adequate</div>
+    <div class="cell h" style="color:var(--indigo)">Compares across different asset types</div><div class="cell m">Missing</div><div class="cell m">Missing</div><div class="cell w">Weak</div><div class="cell w">Weak</div><div class="cell m">Missing</div><div class="cell a">Adequate</div>
+    <div class="cell h">Net outcome after fees for a stated amount</div><div class="cell w">Weak</div><div class="cell w">Weak</div><div class="cell a">Adequate</div><div class="cell a">Adequate</div><div class="cell a">Adequate</div><div class="cell w">Weak</div>
+    <div class="cell h">A human you can reach at commitment</div><div class="cell a">Adequate</div><div class="cell a">Adequate</div><div class="cell s">Strong</div><div class="cell a">Adequate</div><div class="cell s">Strong</div><div class="cell m">Missing</div>
+    <div class="cell h">Knows the user's verified context</div><div class="cell a">Adequate</div><div class="cell a">Adequate</div><div class="cell s">Strong</div><div class="cell s">Strong</div><div class="cell s">Strong</div><div class="cell m">Missing</div>
+  </div>
+  <p class="cap mt2">The property platforms show you a catalogue. There's no recommendation step at all. The robo-advisers do recommend, but only a managed portfolio from inside their own range. ChatGPT will compare anything you like, but it knows nothing verified about you and answers to nobody.</p>
+</section>
+
+<!-- The gap -->
+<section class="slide" data-sec="07 The gap"><div class="kicker"><b>07</b>The gap</div>
+  <h1 class="md">Putting the two together, this is the gap I found</h1>
+  <div class="cols c2" style="margin-top:44px;gap:40px">
+    <div class="card"><span class="n">Already solved by the market</span><h3>Access, fee transparency, and personalisation inside one product range</h3><p>These are the ten basics. We have to match all of them, but we won't lead on any of them.</p></div>
+    <div class="card ink"><span class="n">Nobody is doing this</span><h3>Standing between the different asset types a user is weighing up, and saying which one fits, why the others lost, and what it costs on the amount they have in hand</h3></div>
+    <div class="card"><span class="n">Why the gap exists</span><h3>Only a company that holds all three products has a reason to build it</h3><p>A property platform won't compare itself against categories it doesn't sell. A robo-adviser explains the portfolio it gave you, not the ones it discarded.</p></div>
+    <div class="card" style="border-color:var(--warn)"><span class="n">How long it lasts</span><h3>Until a competitor adds a second asset type</h3><p>SmartCrowd's leadership already talks publicly about tokenisation. The advantage is structural today and copyable in a year or two. I put it in the risk list.</p></div>
+  </div>
+</section>
+
+<!-- Benchmarks -->
+<section class="slide" data-sec="08 Benchmarks"><div class="kicker"><b>08</b>Benchmarks</div>
+  <div class="split wide-left">
+    <div>
+      <h1 class="md">I also walked two real advisor flows to see what good looks like today</h1>
+      <p class="lead sm">Sarwa for questions-to-recommendation, and IBKR for how a big platform is adding AI. I wanted the patterns worth copying and the ones to avoid.</p>
+      <div class="callouts mt3">
+        <div class="callout"><div class="dot">S</div><div><h3>Sarwa: short questionnaire, then an assigned portfolio</h3><p>Short onboarding, a named risk profile, a clear minimum, a review step before you commit. Very good at turning questions into a recommendation. But it stops inside its own range. It never tells you why not gold, or why not property.</p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--loss)">I</div><div><h3>IBKR: AI added onto a professional tool</h3><p>Portfolio Analyst, AI news summaries, connectors to Claude, ChatGPT and Grok, and a long disclaimer saying the AI summaries are provided “as is” and unreviewed. Powerful and dense. Not built for a beginner.</p></div></div>
+      </div>
+      <p class="cap mt3">What I took forward: keep the question set short and review before you pay (from Sarwa). Show the AI's limits inside the flow instead of burying them in a disclaimer nobody reads (the lesson from IBKR).</p>
+    </div>
+    <div class="phones" style="gap:20px">
+      <div class="figure"><div class="phone sm" style="background:#fff;padding:0;border-radius:24px"><img src="assets/bench/sarwa_3.png" alt="Sarwa recommendation" style="border-radius:24px;object-fit:contain;background:#fff"></div><div class="cap">Sarwa's “Conservative – Standard” recommendation</div></div>
+      <div class="figure"><div class="phone sm" style="background:#fff;padding:0;border-radius:24px"><img src="assets/bench/ibkr_connect.jpg" alt="IBKR AI connectors" style="border-radius:24px"></div><div class="cap">IBKR: connect your portfolio to Claude, ChatGPT or Grok</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Revised strategy: where we win -->
+<section class="slide" data-sec="09 Revised strategy"><div class="kicker"><b>09</b>Revised strategy</div>
+  <h1 class="md">So I rewrote the strategy around two things, and decided to be the best at both</h1>
+  <div class="cols c2" style="margin-top:48px;gap:40px">
+    <div class="card soft"><span class="n">Where we win · 01</span><h3 style="font-size:28px">Comparative reasoning at the moment of decision</h3><p>More than a recommendation. It is the recommendation plus why each alternative lost, in the user's own timeline, liquidity need and amount. This is the one row where every competitor was weak or missing, and it's the thing users were asking for in the research.</p></div>
+    <div class="card soft"><span class="n">Where we win · 02</span><h3 style="font-size:28px">An honest scope, including the answer “no”</h3><p>Tell people when what they already hold argues against more of the same, and when the money should stay accessible. Coming from a company that earns fees when people invest, this is what makes everything else believable.</p></div>
+  </div>
+  <div class="card ink mt3" style="padding:30px 40px"><p style="font-size:28px;line-height:1.35;color:#fff">Company X becomes the only place where someone weighing gold against two kinds of property can get one answer, the reasoning behind it, and an honest no when none of them fit.</p></div>
+</section>
+
+<!-- Risks & assumptions -->
+<section class="slide" data-sec="09 Revised strategy"><div class="kicker"><b>09</b>Revised strategy</div>
+  <h1 class="md">Finally, I listed what has to be true for this to work, and how exposed we are on each</h1>
+  <p class="lead sm">I also wrote down what we would not do: compete on minimums or fees, sell Shariah compliance as a differentiator, build a better risk questionnaire, lead with auto-invest, give wealth-level advice, or market the embedded context as “we know you”. Saying no to those made room to do the two things on the previous slide properly.</p>
+  <table class="mt3">
+    <tr><th style="width:44%">What has to be true</th><th>Where it stands</th><th>Exposure</th></tr>
+    <tr><td>Beginners want one recommendation rather than a comparison of three</td><td>Not validated. The research couldn't settle it.</td><td><span class="pill m">High</span> The whole design sits on this fork. Test it first with real users.</td></tr>
+    <tr><td>Users will act on an AI recommendation with real money</td><td>Not validated, and the numbers are uncomfortable. HSBC found 73% use AI for finance but only 12% call it the most influential factor.</td><td><span class="pill m">High</span> Mitigated by a human fallback, not by more explanation.</td></tr>
+    <tr><td>The three-product decision is a real user problem</td><td>Asset-selection pain in general is well supported. The specific three aren't.</td><td><span class="pill w">Medium</span> “The options in front of you” survives even if the three don't.</td></tr>
+    <tr><td>Competitors keep holding a single asset type</td><td>True today, unlikely to stay true.</td><td><span class="pill w">Medium</span> Copyable within a year or two.</td></tr>
+    <tr><td>The recommendation raises conversion</td><td>Not validated. This is the business case.</td><td><span class="pill w">Medium</span> No evidence yet either way.</td></tr>
+    <tr><td>Saying no is commercially tolerable</td><td>Not tested internally.</td><td><span class="pill w">Medium</span> Agree the acceptable share of “no” sessions before launch.</td></tr>
+  </table>
+  <div class="notes">This is the slide the PM will want to argue with, which is fine. The first row is the fork. Bridge: "With the strategy set, I had to turn it into something an engineer could build. So I wrote the PRD."</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">10<small>The PRD</small></div>
+    <div>
+      <h1>Then I turned the strategy into something an engineer could build</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>I had two things to win on, a list of things not to do, and a list of risks. A strategy on paper. Nothing yet that said how the product would actually decide, or what the AI was and wasn't allowed to do.</p></div>
+        <div><span class="l">So I did this</span><p>I wrote the PRD. One paragraph of purpose, three user states, a rules engine, a contract for the AI's output, the things the model must never do, and a data model that doubles as the compliance record.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Shape of the solution -->
+<section class="slide" data-sec="10 PRD"><div class="kicker"><b>10</b>PRD</div>
+  <h1 class="md">The first decision in the PRD was the shape. I chose a guided flow first, conversation second</h1>
+  <p class="lead sm">The brief offered chat, a guided flow, or a hybrid. I went with a hybrid, but with the guided part in charge. Here's why.</p>
+  <div class="cols c3" style="margin-top:44px">
+    <div class="card ghost"><span class="n">I rejected</span><h3>Open chat as the front door</h3><p>A blank text box asks a beginner to already know what to ask. It also invites questions the model can't safely answer. And ChatGPT already does this, for free.</p></div>
+    <div class="card ghost"><span class="n">I rejected</span><h3>A pure questionnaire that ends in a portfolio</h3><p>Sarwa, StashAway and Wahed do this well already. It ends in an assigned product with no comparison, which is exactly the gap I'd found.</p></div>
+    <div class="card soft"><span class="n">I chose</span><h3>Up to four questions, one recommendation, then chat if you want it</h3><p>A structured intake so the decision is deterministic. Conversation only after the answer exists, scoped to this session and this catalogue, with a route to a human for anything else.</p></div>
+  </div>
+  <div class="cols c4 mt3" style="gap:20px">
+    <div class="stat"><div class="v">Timeline</div><div class="l">“When might you need this back?”</div></div>
+    <div class="stat"><div class="v">Amount</div><div class="l">Typed in AED</div></div>
+    <div class="stat"><div class="v">Shariah</div><div class="l">Asked early, as a filter</div></div>
+    <div class="stat"><div class="v">Experience</div><div class="l">Sets how deep the explanation goes</div></div>
+  </div>
+</section>
+
+<!-- Three states -->
+<section class="slide" data-sec="10 PRD"><div class="kicker"><b>10</b>PRD</div>
+  <h1 class="md">One user role, but three situations the advisor has to recognise on its own</h1>
+  <p class="lead sm">I didn't want to ask people “are you new?” The app already knows. So the PRD describes three states the advisor detects.</p>
+  <div class="cols c3" style="margin-top:44px">
+    <div class="card"><span class="n">New</span><h3>No holdings, KYC may not be done</h3><p>The recommendation runs on the conversation alone. KYC is asked for after the recommendation, at the point of investing, never before. Getting advice is free. Holding tokens is what needs verification.</p></div>
+    <div class="card"><span class="n">Returning</span><h3>Already has holdings</h3><p>The advisor asks permission before reading the portfolio. The permission is scoped to this recommendation and can be revoked. If they decline, the standard flow runs with nothing lost and no second ask in the session.</p></div>
+    <div class="card lime"><span class="n">Constrained</span><h3>A small amount, or money partly needed soon</h3><p>The recommendation becomes a split. Some of the money stays accessible and the rest goes to the product that fits. The advisor never ends with nothing for the user to do.</p></div>
+  </div>
+  <p class="cap mt3">Same screens and same permissions in all three states. No admin role in the MVP.</p>
+</section>
+
+<!-- Rules engine -->
+<section class="slide" data-sec="10 PRD"><div class="kicker"><b>10</b>PRD</div>
+  <div class="split wide-left">
+    <div>
+      <h1 class="md">The most important line in the PRD: rules choose the product, the AI explains it</h1>
+      <p class="lead sm">Timeline, amount, Shariah preference and, with permission, existing holdings map to a product through explicit logic. The model writes the explanation of a decision that has already been made. It never makes the decision.</p>
+      <table class="mt3">
+        <tr><th>Rule</th><th>What it does</th></tr>
+        <tr><td>Timeline under 12 months</td><td>No property recommendation of either kind</td></tr>
+        <tr><td>Money described as emergency or health</td><td>Taken out of the investable amount before anything is recommended</td></tr>
+        <tr><td>Amount below a product's minimum</td><td>That product drops out of the set</td></tr>
+        <tr><td>A shortfall</td><td>Never a dead end. A split, with a reason and a way back</td></tr>
+        <tr><td>Holdings clustered in one type or one area</td><td>Concentration becomes the reason behind the product recommended</td></tr>
+        <tr><td>Recommend a <b>type</b>, then two or three matching listings</td><td>We narrow a field rather than pick a security. That keeps the advisory line defensible</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Why I think an engineer will like this</h3>
+      <ul class="list sm mt1">
+        <li>It's deterministic and testable. Every recommendation carries reason codes</li>
+        <li>If the model fails, the rules decision still renders with template reasoning. The user always gets an answer</li>
+        <li>If the model is slow, there's a thinking state. Past three seconds the recommendation renders and the reasoning streams in underneath</li>
+        <li>If the holdings API is down, the concentration check is skipped quietly and the four numbers still show</li>
+      </ul>
+      <h3 class="mt3">Why I think a PM will like this</h3>
+      <ul class="list sm mt1">
+        <li>It's suitability, not financial planning. The regulatory line is drawn in the architecture, not in the copy</li>
+        <li>Users can override: constraint chips are removable and re-run the match</li>
+      </ul>
+      <h3 class="mt3">And what the model must never do</h3>
+      <p class="mt1" style="font-size:16px">Choose the product. Give a projection without saying what it assumes. Use recent performance as a reason to act. Treat hesitation as an objection. Show a confidence score.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Reasoning principles -->
+<section class="slide" data-sec="10 PRD"><div class="kicker"><b>10</b>PRD</div>
+  <h1 class="md">Under the rules sit six principles I borrowed from Graham</h1>
+  <p class="lead sm">I'd read The Intelligent Investor while doing the Kano work. These six ideas from it became rules the engine can enforce.</p>
+  <div class="cols c3" style="margin-top:44px">
+    <div class="card"><h3>Margin of safety</h3><p>Never recommend investing money the user might need. Check that the money is investable first.</p></div>
+    <div class="card"><h3>Investment, not speculation</h3><p>Recommend on suitability. Never on momentum, and never with recent performance as the reason to act now.</p></div>
+    <div class="card"><h3>Projections are not promises</h3><p>Returns are estimates with conditions attached. Say what the number assumes.</p></div>
+    <div class="card"><h3>Diversification</h3><p>Concentration is a risk on its own, even if every individual holding is sound.</p></div>
+    <div class="card"><h3>Costs compound</h3><p>Fees are certain and returns are not. Always show the fee stack in AED on the actual amount.</p></div>
+    <div class="card"><h3>The defensive investor</h3><p>Encourage people to start and to keep going. Never encourage them to take more risk.</p></div>
+  </div>
+</section>
+
+<!-- Data loop -->
+<section class="slide" data-sec="11 Data loop"><div class="kicker"><b>11</b>Data loop</div>
+  <h1 class="md">And the data loop: how the advisor gets better over time</h1>
+  <p class="lead sm">I wanted the model to keep learning from what actually happens in the app, so I designed three loops that feed back into it.</p>
+  <div class="cols c3" style="margin-top:36px">
+    <div class="card soft"><span class="n">Loop 01</span><h3>Recommendation to outcome</h3><p>Every recommendation stores what was said, why, and what the user did next: invested, asked a question, or left. Reasoning patterns get scored on real behaviour, not on how convincing they sound.</p></div>
+    <div class="card soft"><span class="n">Loop 02</span><h3>ProfileFact to memory</h3><p>Answers change over time and the history is kept. The advisor can say “last time you needed this within a year, has that changed?” and the recommendation moves with the answer.</p></div>
+    <div class="card"><span class="n">Loop 03 · the business opportunity</span><h3>Abandoned intent to a qualified signal</h3><p>A user explores and doesn't convert. That's expressed intent, which the business will want for re-engagement. I flagged two conditions:</p><ul class="list sm mt1"><li>Data given to get advice was given for that purpose. Using it for anything else needs a <b>separate opt-in</b> at the advisory moment, not a blanket tick at signup.</li><li>Education about the thing they hesitated on passes the “is this advice or sales?” test. A buy campaign doesn't.</li></ul></div>
+  </div>
+  <p class="cap mt3">I kept that consent separate from the portfolio-read permission on purpose, and left it out of MVP scope.</p>
+  <div class="notes">Bridge: "The PRD told me what to build. Before I could build it I needed a visual language, so the next step was the brand guidelines."</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">12<small>Brand, design system, prototype</small></div>
+    <div>
+      <h1>Then I built it. Brand guidelines first, then the design system, then a working prototype</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>The PRD said what the product had to do. I still had no visual language for it, and Company X's existing screens had a voice that didn't fit the moment someone commits money.</p></div>
+        <div><span class="l">So I did this</span><p>I wrote the brand guidelines, built the design system from them in Lovable, and wired the prototype with the real rules from the PRD. I wanted something I could audit and test like a product, not a set of mockups.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Brand guidelines -->
+<section class="slide" data-sec="12 Brand guidelines"><div class="kicker"><b>12</b>Brand guidelines</div>
+  <div class="split wide-right">
+    <div>
+      <h1 class="md">I wrote the brand guidelines before I drew a single screen</h1>
+      <p class="lead sm">The product needed two voices. A warm marketing voice for the app in general, and a calm, factual voice for the moments when money moves. The advisor lives entirely in the second one.</p>
+      <div class="mt3" style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="badge"><i style="background:#08080F"></i>Background #08080F</span>
+        <span class="badge"><i style="background:#14141E;outline:1px solid #ccc"></i>Card #14141E</span>
+        <span class="badge"><i style="background:#4B31E0"></i>Indigo #4B31E0</span>
+        <span class="badge"><i style="background:#C3F53C"></i>Lime #C3F53C</span>
+        <span class="badge"><i style="background:#3ECF7C"></i>Gain</span>
+        <span class="badge"><i style="background:#FA5F5F"></i>Loss</span>
+        <span class="badge"><i style="background:#F5B93C"></i>Warning</span>
+      </div>
+      <ul class="list sm mt3">
+        <li><b>Plus Jakarta Sans</b>, sentence case everywhere. Numbers big and first, labels small and grey.</li>
+        <li><b>Indigo</b> for actions and reasoning panels. <b>Lime</b> only for new data and positive figures, so it keeps its meaning.</li>
+        <li><b>Green and red</b> only for figures. Charts use the indigo ramp.</li>
+        <li><b>Motion</b> is kept to a minimum. The recommendation reveal is the one moment that gets choreographed.</li>
+      </ul>
+    </div>
+    <div class="shot"><img src="assets/brand_colour.png" alt="Brand guidelines: colour"></div>
+  </div>
+</section>
+
+<!-- Voice + reveal -->
+<section class="slide" data-sec="12 Brand guidelines"><div class="kicker"><b>12</b>Brand guidelines</div>
+  <div class="split">
+    <div class="shot"><img src="assets/brand_voice.png" alt="Brand guidelines: voice and tone"></div>
+    <div>
+      <h1 class="md">The voice rules apply to the model as well as to me</h1>
+      <ul class="list sm mt3">
+        <li>Second person, contractions, no first person. No greeting, no preamble, no sign-off.</li>
+        <li>Every product gets a line about what it's good at before one is chosen. No Company X product is ever described only by what it lacks.</li>
+        <li>Plain financial nouns. Hedge with “approximate” and “estimated”, not with softeners.</li>
+        <li>No apology when the answer is a split. The split is the right answer.</li>
+      </ul>
+      <div class="card ink mt3" style="padding:26px 30px">
+        <span class="n">Sample copy · AED 2,000 · emergency health fund</span>
+        <p style="font-size:18px"><b style="color:#fff">Some of this shouldn't be invested, and that's the right answer.</b> Money set aside for a health emergency needs to be reachable the day you need it. Nothing here guarantees that, so keep AED 1,500 where you can get to it. <b style="color:#fff">For the remaining AED 500, gold.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Design system in Lovable -->
+<section class="slide" data-sec="13 Design system"><div class="kicker"><b>13</b>Design system</div>
+  <div class="split wide-left">
+    <div>
+      <h1 class="md">Then I built the design system in Lovable, inside the existing app</h1>
+      <p class="lead sm">I didn't want the advisor to feel like a separate product bolted on. It reuses the app's cards, chips, cost breakdown and detail screens, and adds only the pieces that are new.</p>
+      <div class="cols c2 mt3" style="gap:20px">
+        <div class="card" style="padding:22px 26px"><span class="n">Reused from the app</span><p>Product cards · fee chips · cost breakdown · listing detail · invest and review · bottom nav</p></div>
+        <div class="card soft" style="padding:22px 26px"><span class="n">New pieces for the advisor</span><p>Invitation card · one question per screen · thinking state · recommendation card · “the others, for later” · what would change this · suggested follow-ups · permission sheet</p></div>
+      </div>
+      <p class="cap mt3">One thing I dropped on purpose: a confidence meter. “What would change this” does the same job without pretending to be precise.</p>
+      <div class="links mt3">
+        <div><span class="l">Design system at Lovable</span><a href="https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ" target="_blank" rel="noopener">https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ</a></div>
+        <div><span class="l">Fully wired prototype</span><a href="https://investmentadvisordxb.lovable.app/" target="_blank" rel="noopener">https://investmentadvisordxb.lovable.app/</a></div>
+      </div>
+    </div>
+    <div class="phones" style="gap:24px">
+      <div class="figure"><div class="phone sm"><img src="assets/shots/home.png" alt="Invest home"></div><div class="cap">Invest home: the three products, then the advisor invitation</div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/brand_advisor.png" alt="Advisor patterns" style="object-fit:cover;object-position:left top"></div><div class="cap">The advisor pattern spec from the guidelines</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Prototype: walkthrough divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">14<small>The prototype</small></div>
+    <div>
+      <h1>Let me walk you through the prototype the way a first-time user would see it</h1>
+      <div class="bridge">
+        <div><span class="l">The main path</span><p>Someone with AED 20,000 they won't need for five years, and no Shariah requirement. Nine screens from the invitation to the review step.</p></div>
+        <div><span class="l">Then the branches</span><p>A split for someone with less money and less time, a returning user who is asked for permission, and the edge cases the rules handle on their own.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 1 Entry -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag">01 · Entry</span>
+      <h1 class="md mt2">It starts with an invitation, not an empty chat box</h1>
+      <p class="lead sm">The user is already looking at the three products. The advisor sits underneath them and asks one scoped question, with three tappable starters. One of them is the question beginners always ask.</p>
+      <ul class="list sm mt3">
+        <li>“Is fractional property right for me?” · “I have AED 20,000 for 5 years” · “I have AED 2,000 for a few months”</li>
+        <li>You can type, but the structure carries the intake</li>
+        <li>Every screen has the same footer: <em>Follows set rules and published fees. Check the details before you invest.</em></li>
+      </ul>
+    </div>
+    <div class="phones"><div class="figure"><div class="phone"><img src="assets/shots/entry.png" alt="Advisor entry"></div></div></div>
+  </div>
+</section>
+
+<!-- 2 Questions + thinking -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-right">
+    <div class="phones">
+      <div class="figure"><div class="phone sm"><img src="assets/shots/q_shariah.png" alt="Questions"></div><div class="cap">Amount and timeline come from the starter. Shariah and experience follow</div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/shots/daniel_2.png" alt="Thinking state"></div><div class="cap">The thinking state names the checks instead of showing a spinner</div></div>
+    </div>
+    <div>
+      <span class="tag">02 · Questions, then thinking</span>
+      <h1 class="md mt2">Four questions at most, then it shows its working</h1>
+      <p class="lead sm">The advisor confirms what it heard (“AED 20,000 clears the minimum for all three…”) before it asks the next thing. Shariah is asked once, as a filter.</p>
+      <div class="card soft mt3" style="padding:22px 26px">
+        <p style="font-size:17px"><b>Checking AED 20,000 against each minimum</b><br><b>Checking lock-ins against your timeline</b><br><b>Comparing fees over your timeline</b></p>
+      </div>
+      <p class="cap mt2">Those three lines are the rules engine made visible. This is how I chose to build trust, instead of a confidence score.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 Recommendation -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag">03 · The recommendation</span>
+      <h1 class="md mt2">One answer, framed around their money</h1>
+      <p class="lead sm">“Fractional property fits a hold of 3 years or more.” The card is tagged <em>For your AED 20,000</em>, then shows what they'd own, why it fits, and what it costs, in that order.</p>
+      <div class="cols c3 mt3" style="gap:20px">
+        <div class="stat"><div class="v num" style="font-size:44px">19,801</div><div class="l">AED invested</div></div>
+        <div class="stat"><div class="v num" style="font-size:44px">198</div><div class="l">AED entry fee, charged once</div></div>
+        <div class="stat"><div class="v num" style="font-size:44px">19,999</div><div class="l">AED total to pay, inside the budget</div></div>
+      </div>
+      <p class="cap mt3">The fee comes out of the user's AED 20,000, it's never added on top. That came from the UX audit. I'll come back to it.</p>
+    </div>
+    <div class="phones">
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_rec_grid.png" alt="Recommendation card"></div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_why_8000.png" alt="Why it fits and cost"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 Others / what would change -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-right">
+    <div class="phones">
+      <div class="figure"><div class="phone sm"><img src="assets/shots/rec_why.png" alt="The others, for later"></div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/shots/rec_listings.png" alt="Matching listings"></div></div>
+    </div>
+    <div>
+      <span class="tag">04 · Why not the others, and what would change this</span>
+      <h1 class="md mt2">This is the strategy on a screen: why the other two lost, and what would change the answer</h1>
+      <div class="callouts mt3">
+        <div class="callout"><div class="dot" style="background:var(--tok)">T</div><div><h3>Tokenised property: “built for holds of 18 months to 3 years. Yours is longer.”</h3><p>It opens with what the product is good at, then says why it lost here.</p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--gold)">G</div><div><h3>Gold: “earns no rental income. Your timeline is long enough for property.”</h3><p>It could fit if the money needed to stay reachable.</p></div></div>
+        <div class="callout"><div class="dot">?</div><div><h3>What would change this: “needing the money within 3 years.”</h3><p>A stated condition, rather than a confidence percentage.</p></div></div>
+      </div>
+      <p class="cap mt3">Then two or three matching listings, “Best matches for AED 19,801”. Never the whole catalogue.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 Listing → review -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag">05 · Listing, review, pay</span>
+      <h1 class="md mt2">Then it hands over to the app's normal flow, and the reasoning comes along</h1>
+      <p class="lead sm">Tap a listing and you're in the app's usual detail screen, with one addition: a lime chip that says <em>Recommended for your 3 to 5 years timeline</em>. The amount is prefilled. Nothing changes at the last step.</p>
+      <ul class="list sm mt3">
+        <li>The review screen shows the same cost breakdown the advisor showed</li>
+        <li>“What happens next”: you pay today, first rent in March 2027, first exit window in September 2027</li>
+        <li>An explicit tick: <em>I understand my money is tied up until the first exit window</em></li>
+        <li>KYC would appear only here, only if it's incomplete, and it would bring you back to this listing</li>
+      </ul>
+    </div>
+    <div class="phones">
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_listing.png" alt="Listing detail"></div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_review.png" alt="Review your investment"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 Split -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-right">
+    <div class="phones"><div class="figure"><div class="phone"><img src="assets/shots/split.png" alt="Split recommendation"></div></div></div>
+    <div>
+      <span class="tag lime">06 · The split, for the constrained user</span>
+      <h1 class="md mt2">“Some of this shouldn't be invested, and that's the right answer.”</h1>
+      <p class="lead sm">Now the second starter: AED 2,000 for a few months. The advisor keeps AED 1,500 accessible and puts AED 500 into gold, because gold has no lock-in and starts at AED 100.</p>
+      <div class="cols c2 mt3" style="gap:20px">
+        <div class="card" style="padding:20px 24px"><span class="n">Keep accessible</span><h3 class="num">AED 1,500</h3><p>Not invested, and shown on the confirmation rather than quietly dropped.</p></div>
+        <div class="card" style="padding:20px 24px"><span class="n">Gold</span><h3 class="num">AED 500</h3><p>What would change this: AED 2,500 or more, or 18 months or more.</p></div>
+      </div>
+      <p class="cap mt3">Two buttons, both real: <b>Continue to review</b> and <b>Come back to this later</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 Returning: permission -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag">07 · The returning user</span>
+      <h1 class="md mt2">For someone who already invests, the advisor asks permission to look at their portfolio before it recommends anything</h1>
+      <p class="lead sm">The app already holds their data. The advisor could just use it. Instead it asks: “Want me to look at what you hold with Company X? I'll read your investments, what you paid, rent received and key dates. Just for this chat.” It says exactly what it will read and why: so the recommendation takes into account what they already own, rather than recommending more of the same.</p>
+      <ul class="list sm mt3">
+        <li><b>Asking is how trust is built.</b> A recommendation that quietly used your data feels like surveillance. One that asked first, and then visibly changed because of what it saw, feels like advice</li>
+        <li><b>Scoped and revocable.</b> This chat only. It expires with the session and can be switched off in settings. It is separate from any marketing consent</li>
+        <li><b>No is a real answer.</b> Decline, and the standard flow runs with nothing lost and no second ask</li>
+      </ul>
+      <p class="cap mt3">This comes from the AI consent research I read: permission asked at the moment it's needed, with the reason attached, gets more data and better data than a blanket tick at signup.</p>
+    </div>
+    <div class="phones">
+      <div class="figure"><div class="phone sm"><img src="assets/shots/permission.png" alt="Permission ask"></div><div class="cap">The ask: what it will read, why, and two real buttons. Yes, go ahead · No thanks</div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_portfolio.png" alt="Portfolio summary"></div><div class="cap">What it reads if you say yes: four numbers, one chart, the holdings</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 Portfolio insights -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-right">
+    <div class="phones"><div class="figure"><div class="phone"><img src="assets/shots/insights.png" alt="Portfolio insights"></div></div></div>
+    <div>
+      <span class="tag">08 · What saying yes gets you</span>
+      <h1 class="md mt2">Three things worth a look, and a recommendation that takes them into account</h1>
+      <div class="callouts mt3">
+        <div class="callout"><div class="dot">1</div><div><h3>A lock-in that's about to end</h3><p>“Two bedroom apartment in Business Bay has an exit window on 15 October 2026, in 35 days.” Follow-up: <em>Should I sell at this window?</em></p></div></div>
+        <div class="callout"><div class="dot">2</div><div><h3>A rent gap</h3><p>“Studio apartment in Business Bay paid no rent last quarter.” Follow-up: <em>What does that mean for me?</em></p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--warn)">3</div><div><h3>Concentration</h3><p>“AED 23,000 of your AED 26,000 is in Business Bay… most of your money is affected at once.” Follow-up: <em>See options outside Business Bay</em></p></div></div>
+      </div>
+      <p class="cap mt3">Concentration becomes the reason behind the next recommendation. It's never “your properties are up 9%, so here's another one”. Returns are context, never an argument.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 Not now / Daniel preview -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag warn">09 · The edge cases</span>
+      <h1 class="md mt2">Where the flow bends instead of breaking</h1>
+      <table class="mt3">
+        <tr><th>Situation</th><th>What the user sees</th></tr>
+        <tr><td>Timeline under 12 months</td><td>No property of either kind. Gold, or keep it accessible.</td></tr>
+        <tr><td>Below every minimum</td><td>The constraint named, a chip to remove it, and “come back later” with no shame attached.</td></tr>
+        <tr><td>Fewer than two listings match</td><td>What exists, the constraint that's filtering, and the chip underneath.</td></tr>
+        <tr><td>Model slow or down</td><td>The rules decision renders with template reasoning. There's always an answer.</td></tr>
+        <tr><td>A question out of scope</td><td>Routed to a human, not guessed at.</td></tr>
+        <tr><td>User wants to override</td><td>Remove a constraint chip and the match re-runs. No arguing with the advisor.</td></tr>
+      </table>
+    </div>
+    <div class="phones"><div class="figure"><div class="phone"><img src="assets/user/u_gold_3000.png" alt="Gold for under 18 months"></div><div class="cap">AED 3,000 for 2 months: “Gold fits money you might need within 18 months.” This one turns out to be wrong. Hold that thought.</div></div></div>
+  </div>
+  <div class="notes">Set up the Daniel story here. The rules handled the timeline but not the medical reserve. That's what the synthetic testing found later.</div>
+</section>
+
+<!-- Full demo -->
+<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
+  <div class="body">
+    <h2>The full walkthrough</h2>
+    <p class="sub mt1">Entry, questions, recommendation, listing, review. Then the split and the returning-user path.</p>
+    <div class="video mt3" data-key="demo" style="max-width:1500px;margin-left:auto;margin-right:auto">
+      <div class="ph"><div class="play"></div><h3>Full product demo</h3><p>drop file or link into src/videos.js → demo</p></div>
+    </div>
+  </div>
+  <div class="notes">Live prototype: investmentadvisordxb.lovable.app. Demo user menu: New / Returning with holdings / Reset. Bridge: "So I had a working prototype. Before user testing, I audited it properly, with Gemini as a second opinion."</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">15<small>UX audit</small></div>
+    <div>
+      <h1>Then I ran a UX audit on the prototype, with Gemini as a second pair of eyes</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>I had a working prototype. Before putting users in front of it, I wanted to check it against my own PRD and brand guidelines, so that user testing could focus on how people think rather than on issues a designer should catch.</p></div>
+        <div><span class="l">So I did this</span><p>I recorded myself walking the whole flow, then audited the recording heuristically against the PRD and brand guidelines, and asked Gemini for a structural critique of the same recording. This chapter is the audit. Synthetic user testing comes after, and I kept the two apart on purpose.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Method + findings -->
+<section class="slide" data-sec="15 UX audit"><div class="kicker"><b>15</b>UX audit</div>
+  <div class="split" style="gap:56px">
+    <div>
+      <h1 class="md">How I ran the audit</h1>
+      <div class="callouts mt3">
+        <div class="callout"><div class="dot">1</div><div><h3>A screen recording, the PRD and the brand guidelines</h3><p>I walked the AED 20,000 path end to end, then the split and the error states, noting timestamps as I went.</p></div></div>
+        <div class="callout"><div class="dot">2</div><div><h3>Heuristics, judged against my own spec</h3><p>Consistency of the interaction model, whether every number matches the user's mental model, cognitive load at the decision moments, error recovery, visual hierarchy, and whether it obeys the PRD.</p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--ink)">G</div><div><h3>Gemini as a structural critic</h3><p>I asked for a blunt critique of the recording. I kept what I could verify and dropped what I couldn't. Everything from Gemini is labelled as an audit input, not a finding on its own.</p></div></div>
+      </div>
+    </div>
+    <div>
+      <h3>What it found</h3>
+      <table class="mt1">
+        <tr><th style="width:52%">Issue</th><th>Fix</th></tr>
+        <tr><td><b>“Total to pay” was above the user's stated amount.</b> Fees were added on top of AED 20,000</td><td>Fees come out of the ceiling. Next slide</td></tr>
+        <tr><td><b>A conversation behaving like a form.</b> A live composer during a tap-only intake, and an edit sheet with no Save</td><td>Composer gated until the recommendation exists. A real Save. Free text parsed, not shrugged at</td></tr>
+        <tr><td><b>“Show me scenarios” was a spreadsheet in a bottom sheet.</b> Years across, outcomes down</td><td>One scenario at a time, in AED, loss case always shown</td></tr>
+        <tr><td><b>One error wiped the session.</b> “This page didn't load”, then Go home</td><td>Retry the component, never the flow. Session state persists</td></tr>
+        <tr><td><b>Playback after every tap.</b> “Here's what I picked up… that's right?”</td><td>Confirm only when free text was parsed</td></tr>
+        <tr><td><b>Goal tags at the pay step.</b> A discovery question at the highest-friction point</td><td>Optional bottom sheet after confirmation</td></tr>
+        <tr><td><b>The cost panel shouted louder than the recommendation</b></td><td>Headline leads, cost panel goes neutral</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="notes">If asked: the identity-crisis finding came at 01:34 in the recording. The user tapped "Change something", a form appeared inside the chat, the button still said "Change something", nothing happened, so they typed "done" and the AI failed. My own PRD said no open text field as an entry point. The prototype broke my own rule.</div>
+</section>
+
+<!-- Finding 2: fee math -->
+<section class="slide" data-sec="15 UX audit"><div class="kicker"><b>15</b>UX audit</div>
+  <div class="split">
+    <div>
+      <span class="tag loss">The finding that mattered most · fees</span>
+      <h1 class="md mt2">“Total to pay” didn't match how people think about their money</h1>
+      <p class="lead sm">The user said they had exactly AED 20,000. The card said the total was AED 20,200. The app was assuming they had a spare AED 200 lying around for the fee. At a real payment gateway, that transaction fails.</p>
+      <p class="cap mt3">The audit asked me a question I couldn't dodge: <em>“Are you assuming users treat their stated amount as a baseline rather than a ceiling?”</em> I was. And every quote in my research treated it as a ceiling.</p>
+    </div>
+    <div class="compare">
+      <div><span class="ba before">Before</span><h3>Fees added on top</h3><p style="font-size:17px">You invest <b class="num">AED 20,000</b><br>Entry fee <b class="num">AED 200</b><br>Total to pay <b class="num" style="color:var(--loss)">AED 20,200</b></p><p class="cap mt2">Assumes AED 200 the user never mentioned.</p></div>
+      <div><span class="ba after">After</span><h3>Fees inside the ceiling</h3><p style="font-size:17px">You invest <b class="num">AED 19,801</b><br>Entry fee <b class="num">AED 198</b><br>Total to pay <b class="num" style="color:var(--gain)">AED 19,999</b></p><p class="cap mt2">“Fees are taken from your AED 20,000.” The same line appears again at review.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- What worked -->
+<section class="slide" data-sec="15 UX audit"><div class="kicker"><b>15</b>UX audit</div>
+  <h1 class="md">And three things that were working well, which I kept and protected</h1>
+  <div class="cols c3" style="margin-top:44px">
+    <div class="card lime"><span class="n">Kept</span><h3>The thinking state</h3><p>“Checking AED 20,000 against each minimum” instead of a spinner. It does exactly what the PRD's show-the-reasoning requirement asked for.</p></div>
+    <div class="card lime"><span class="n">Kept</span><h3>The recommendation structure</h3><p>The product, then why it fits in the user's own words, then why the other two lost. It mirrors the output contract block for block.</p></div>
+    <div class="card lime"><span class="n">Kept</span><h3>The figures</h3><p>Tabular numerals, aligned columns, no monospace for money. The design system's rules held up under real content.</p></div>
+  </div>
+  <p class="cap mt3">Knowing what works matters as much as knowing what doesn't. These three became my regression checks for everything I changed afterwards.</p>
+</section>
+
+<!-- Improvements round 1 -->
+<section class="slide" data-sec="16 Improvements, round 1"><div class="kicker"><b>16</b>Improvements, round 1</div>
+  <h1 class="md">Here's what I changed after the audit</h1>
+  <p class="lead sm">Four groups of fixes. Each one traces back to a finding from the audit.</p>
+  <div class="cols c4" style="margin-top:44px;gap:24px">
+    <div class="card soft"><span class="n">Money</span><h3>Fees inside the ceiling</h3><p>AED 19,801 + 198 = 19,999. The same figures on the card and at review.</p></div>
+    <div class="card soft"><span class="n">Conversation</span><h3>A stable engine</h3><p>Composer gated until the recommendation. A real Save action. Errors retry in place and the session survives.</p></div>
+    <div class="card soft"><span class="n">Invest flow</span><h3>Review before you pay</h3><p>No investing straight from a chat tile any more. Listing, then review, then confirm, with “what happens next” dates.</p></div>
+    <div class="card soft"><span class="n">Goals</span><h3>Goal tag as a bottom sheet</h3><p>Optional, after confirmation. It feeds ProfileFact for check-ins later.</p></div>
+  </div>
+  <div class="card ink mt3" style="padding:26px 34px"><p style="font-size:22px;color:#fff">The audit fixed the things a designer can see. What it can't find is what happens when a real person explains their situation in their own words and the product misunderstands them. For that I needed users.</p></div>
+</section>
+
+<!-- Improvements round 1: screens -->
+<section class="slide" data-sec="16 Improvements, round 1"><div class="kicker"><b>16</b>Improvements, round 1</div>
+  <div class="split wide-right">
+    <div class="phones">
+      <div class="figure"><span class="ba after">After</span><div class="phone sm"><img src="assets/user/u_listing.png" alt="Listing with recommendation chip"></div><div class="cap">The listing carries the reason it was picked</div></div>
+      <div class="figure"><span class="ba after">After</span><div class="phone sm"><img src="assets/user/u_review.png" alt="Review before pay"></div><div class="cap">Fees inside AED 20,000, and an explicit tie-up tick</div></div>
+      <div class="figure"><span class="ba after">After</span><div class="phone sm"><img src="assets/user/u_confirm_grid.png" alt="Share record"></div><div class="cap">Share record: 2.02%, one square per 1%</div></div>
+    </div>
+    <div>
+      <span class="tag">After the audit · the invest flow</span>
+      <h1 class="md mt2">The same numbers, three times over</h1>
+      <p class="lead sm">The recommendation, the review and the confirmation now show the identical breakdown. AED 19,801 invested, AED 198 fee, AED 19,999 total. The user never meets a new figure at the moment they pay.</p>
+      <ul class="list sm mt3">
+        <li>The amount field is the stated budget, and the line under it does the fee maths out loud</li>
+        <li>“The value can go down as well as up… Rent isn't guaranteed” sits above the button, not in a footnote</li>
+        <li><b>Not now</b> is a real exit at the last step, not just a back arrow</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">Bridge: "So the prototype was in a state where the obvious things were fixed. Now I needed people in front of it. I didn't have real customers, so I built a panel."</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">17<small>Synthetic user testing</small></div>
+    <div>
+      <h1>Then I user tested it with six synthetic users, each with a different personality</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>The audit had fixed what I could see. I still didn't know what would happen when someone described their own situation in their own words and the product got it wrong. I had no real customers to find out with.</p></div>
+        <div><span class="l">So I did this</span><p>I built six synthetic users on the OCEAN personality model, each designed to break a different promise the product makes. Then I had GPT Astra, an agentic model, drive the live Lovable prototype through 22 scenarios in a real browser, one persona at a time. I'm careful throughout about what this can and can't tell us.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why synthetic -->
+<section class="slide" data-sec="17 Synthetic panel"><div class="kicker"><b>17</b>Synthetic panel</div>
+  <div class="split">
+    <div>
+      <h1 class="md">Why synthetic users, and what I used them for</h1>
+      <p class="lead sm">A UX audit finds what a designer can see. It can't find what happens when a person explains their situation and the product misunderstands them. For that you need a user, or the closest honest stand-in you can get.</p>
+      <ul class="list sm mt3">
+        <li><b>What it's for:</b> finding failure modes before real-user research, so that research tests the right things</li>
+        <li><b>What it's not for:</b> representing demographics, proving demand, or proving anyone would invest</li>
+        <li>Each of the six is built to break a different promise the product makes</li>
+      </ul>
+    </div>
+    <div class="card ink">
+      <span class="n">The label I put on everything that follows</span>
+      <p style="font-size:20px;line-height:1.5"><b style="color:#fff">The app's responses were observed.</b> The people's reactions, quotes, trust scores and decisions are <b style="color:#C3F53C">simulated</b>. They tell me what to investigate with real users. They are not customer feedback and they are not proof of demand.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Panel -->
+<section class="slide" data-sec="17 Synthetic panel"><div class="kicker"><b>17</b>Synthetic panel</div>
+  <h1 class="md">Six synthetic users with six different personalities: two new, two returning, two constrained</h1>
+  <p class="sub mt1">I mapped each one on the OCEAN model (openness, conscientiousness, extraversion, agreeableness, neuroticism), then added a money mindset and a limit on how much they'll read, so they behave differently in front of the same screen.</p>
+  <div class="cols c3 mt3" style="gap:20px">
+    <div class="card" style="padding:24px 26px"><div class="persona"><div class="av">M</div><div><h3>Maya · a true beginner</h3><div class="role">New · AED 5,000 · reads 3 lines</div><p>Accepts guidance, guesses at terms, skims. Worries about losing money but won't read the detail that explains it.</p></div></div></div>
+    <div class="card" style="padding:24px 26px"><div class="persona"><div class="av" style="background:var(--ink)">A</div><div><h3>Arjun · the skeptical researcher</h3><div class="role">New · AED 8,000 · reads 10 lines</div><p>Wants evidence, questions tokenised vs fractional. If a big question stays open, he leaves to research.</p></div></div></div>
+    <div class="card" style="padding:24px 26px"><div class="persona"><div class="av" style="background:var(--tok)">O</div><div><h3>Omar · heavy on property already</h3><div class="role">Returning · grants access · reads 6 lines</div><p>Trusts the app, defends his property picks, thinks several properties means diversified.</p></div></div></div>
+    <div class="card" style="padding:24px 26px"><div class="persona"><div class="av" style="background:var(--indigo-deep)">L</div><div><h3>Leila · privacy first</h3><div class="role">Returning · refuses access · reads 8 lines</div><p>Reads permission requests carefully. Repeat asks make her suspicious. A clean decline builds trust.</p></div></div></div>
+    <div class="card" style="padding:24px 26px"><div class="persona"><div class="av" style="background:var(--gold)">Ay</div><div><h3>Ayesha · small amount, strict on Shariah</h3><div class="role">Constrained · AED 1,500 · reads 5 lines</div><p>If compliance isn't clear she cannot proceed. Checks with family when she's unsure.</p></div></div></div>
+    <div class="card lime" style="padding:24px 26px"><div class="persona"><div class="av" style="background:var(--warn)">D</div><div><h3>Daniel · money that already has a job</h3><div class="role">Constrained · AED 3,000, needs AED 2,200 in 2 months · reads 4 lines</div><p>Access to the money matters most. “Liquid” can sound like “safe” to him. He tests whether the product can recommend <em>less</em>.</p></div></div></div>
+  </div>
+</section>
+
+<!-- Why difficult -->
+<section class="slide" data-sec="17 Synthetic panel"><div class="kicker"><b>17</b>Synthetic panel</div>
+  <div class="split">
+    <div>
+      <h1 class="md">I paired them up so each pair would pull the product in opposite directions</h1>
+      <p class="lead sm">Six people who should behave in six different ways on exactly the same interface.</p>
+      <table class="mt3">
+        <tr><th>Pair</th><th>What the contrast tests</th></tr>
+        <tr><td>Maya and Arjun</td><td>Both need an explanation, at opposite depths. The essentials have to be visible without digging, and the reasoning has to be there for anyone who wants to inspect it.</td></tr>
+        <tr><td>Omar and Leila</td><td>Personalisation has to earn permission, and the guidance has to stay complete when permission is refused.</td></tr>
+        <tr><td>Ayesha and Daniel</td><td>Different conditions, same rule: something non-negotiable that can't be traded away for a convenient recommendation.</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Personality spread (1 to 5)</h3>
+      <table class="dense mt1">
+        <tr><th></th><th>Open</th><th>Detail</th><th>Social</th><th>Defers to guidance</th><th>Uncertainty</th><th>Mindset</th></tr>
+        <tr><td>Maya</td><td>2</td><td>1</td><td>4</td><td>5</td><td>4</td><td>Avoidant</td></tr>
+        <tr><td>Arjun</td><td>4</td><td>5</td><td>2</td><td>1</td><td>5</td><td>Cautious</td></tr>
+        <tr><td>Omar</td><td>3</td><td>3</td><td>3</td><td>4</td><td>2</td><td>Status</td></tr>
+        <tr><td>Leila</td><td>2</td><td>4</td><td>1</td><td>2</td><td>5</td><td>Growth</td></tr>
+        <tr><td>Ayesha</td><td>1</td><td>4</td><td>5</td><td>3</td><td>4</td><td>Cautious</td></tr>
+        <tr><td>Daniel</td><td>3</td><td>2</td><td>4</td><td>2</td><td>5</td><td>Avoidant</td></tr>
+      </table>
+      <p class="cap mt2">Maya can accept a recommendation without understanding it. Arjun can understand it and still not trust it. Full persona sheets are in the appendix.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Method -->
+<section class="slide" data-sec="18 Live testing"><div class="kicker"><b>18</b>Live testing</div>
+  <div class="split wide-right">
+    <div class="shot"><img src="assets/test/astra_2.png" alt="Agentic model driving the live prototype in a cloud browser"></div>
+    <div>
+      <h1 class="md">Then I ran them live on the real prototype, not as a thought experiment</h1>
+      <p class="lead sm">I used GPT Astra in its agentic environment. It had its own virtual computer and I could watch it interact with my Lovable prototype, a bit like a Hotjar session replay but live. I gave it the 22 scenarios, the six persona sheets and the PRD, and it reported what the app did against what the PRD said it should do.</p>
+      <ul class="list sm mt3">
+        <li>10 and 11 September · desktop Chrome at mobile width · reset between independent journeys</li>
+        <li>Each persona walked their own path: their amount, their timeline, the concern that defines them</li>
+        <li>The app's behaviour was recorded word for word. The persona reactions were written afterwards as simulations</li>
+      </ul>
+      <p class="cap mt3">Next slide: a short recording of one of these sessions.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Astra live-testing video -->
+<section class="slide" data-sec="18 Live testing" style="padding:84px 96px 70px"><div class="kicker"><b>18</b>Live testing</div>
+  <div class="body" style="gap:16px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:40px">
+      <h2 style="font-size:30px;margin:0">GPT Astra live-testing the Lovable prototype as one of the synthetic users</h2>
+      <span class="tag" style="flex:none">Recording · 25 seconds · with sound</span>
+    </div>
+    <div class="video" data-key="astra" data-poster="assets/video/astra_poster.jpg" style="flex:1;aspect-ratio:auto;min-height:0">
+      <div class="ph"><div class="play"></div><h3>GPT Astra live testing</h3><p>assets/video/astra.mp4</p></div>
+    </div>
+    <p class="cap" style="text-align:center">The agent reads the persona sheet, drives the real prototype in its own browser, and logs what the app did against the PRD. What the app did is observed. How the persona felt about it is simulated.</p>
+  </div>
+</section>
+
+<!-- Headline finding -->
+<section class="slide divider nobrand" data-sec="19 What testing revealed"><div class="kicker"><b>19</b>What testing revealed</div>
+  <div class="body" style="grid-template-columns:1fr">
+    <div>
+      <div class="section-num">The main finding</div>
+      <h1>Getting started was easy. Getting reassured wasn't</h1>
+      <p class="lead">The app could take someone all the way to a recommendation. What it couldn't yet do, reliably, was help them understand and trust that recommendation in the context of their own life. Maya asked “Can I lose my money?” and got “I didn't catch that.” Ayesha said yes to Shariah and never saw it confirmed. Daniel's medical reserve got invested. Those are the moments where a helpful interface has to turn into a dependable advisor.</p>
+      <p class="cap mt2">What worked: the approachable start, costs in AED, personalisation you could point at, a “no” that held, and a calm “not now” exit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Daniel -->
+<section class="slide" data-sec="19 What testing revealed"><div class="kicker"><b>19</b>What testing revealed</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag loss">Critical · F01, F02</span>
+      <h1 class="md mt2">Daniel: “This money has a job already”</h1>
+      <div class="card ink mt3" style="padding:22px 28px"><p style="font-size:19px;font-family:var(--mono)">I have AED 3000. I need AED 2200 in 2 months for a family medical expense.</p></div>
+      <div class="callouts mt3">
+        <div class="callout"><div class="dot" style="background:var(--loss)">1</div><div><h3>The app picked up AED 3,000 and two months. It ignored the AED 2,200</h3><p>It recommended investing all AED 3,000 in gold.</p></div></div>
+        <div class="callout"><div class="dot" style="background:var(--loss)">2</div><div><h3>He repeated the concern. The app read “2,200” as a new budget</h3><p>Now it said AED 1,700 accessible and AED 500 in gold. Still not his reserve. Trying to clarify made it worse.</p></div></div>
+      </div>
+      <p class="lead sm mt3"><b>Recognising a number is not the same as understanding what the number is for.</b> The prepared AED 2,000 starter produced a perfect split, so the logic was there. Daniel's own words never reached it.</p>
+    </div>
+    <div class="phones">
+      <div class="figure"><span class="ba before">Before the fix · first reply</span><div class="phone sm"><img src="assets/user/u_gold_3000.png" alt="All 3,000 to gold"></div><div class="cap">“You invest AED 3,000.” Nothing left for the bill.</div></div>
+      <div class="figure"><span class="ba before">Before the fix · after he repeated himself</span><div class="phone sm"><img src="assets/user/u_split_1700.png" alt="Correction misread as a new budget"></div><div class="cap">The checks re-run on AED 2,200 as a budget. Still not a reserve.</div></div>
+    </div>
+  </div>
+  <div class="notes">Simulated reaction: "But can I get the money back for the bill?" Outcome: rejects and stops. Real-user question: would a real person catch this, or read "sell any day" as good enough?</div>
+</section>
+
+<!-- Omar & Leila -->
+<section class="slide" data-sec="19 What testing revealed"><div class="kicker"><b>19</b>What testing revealed</div>
+  <div class="split wide-right">
+    <div class="phones">
+      <div class="figure"><div class="phone sm"><img src="assets/shots/insights_2.png" alt="Omar's insights and listings"></div><div class="cap">Omar: Business Bay concentration, so listings from elsewhere</div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/shots/ret_home.png" alt="Returning entry shows holdings before permission"></div><div class="cap">“You hold AED 26,000 across 4 investments”, shown before permission</div></div>
+    </div>
+    <div>
+      <span class="tag gain">What worked · Omar and Leila</span>
+      <h1 class="md mt2">Personalisation became believable once someone could point at what it changed</h1>
+      <ul class="list check sm mt3">
+        <li>Omar: “It showed me another area because I already have a lot in Business Bay.” The listings visibly changed.</li>
+        <li>Leila: “No thanks” held. She asked again in the same chat and got no second request. The recommendation and review were still reachable.</li>
+      </ul>
+      <span class="tag warn mt3" style="display:inline-flex">One boundary problem · High</span>
+      <p class="mt1">The returning entry screen already showed the portfolio total and the number of holdings <em>before</em> asking permission. So what exactly was the advisor asking to access? The stated boundary has to match what the advisor shows and uses.</p>
+      <p class="cap mt2">A smaller one from Omar: after “25000 for 5 years” it asked for the timeline again. Recoverable, but it felt inattentive.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Trust movement -->
+<section class="slide" data-sec="19 What testing revealed"><div class="kicker"><b>19</b>What testing revealed</div>
+  <div class="split">
+    <div>
+      <h1 class="md">How trust changed through each journey, and what changed it</h1>
+      <p class="lead sm">These are simulated scores from 1 to 5. I kept them only because they make the pattern easy to see. I also kept three questions separate: do I trust the company, do I trust the AI to understand me, and does <em>this</em> recommendation make sense.</p>
+      <table class="mt3">
+        <tr><th></th><th>Trust in the AI: start → recommendation → end</th><th>Confidence in the decision</th></tr>
+        <tr><td>Maya</td><td class="num">4 → 4 → <b style="color:var(--loss)">2</b></td><td class="num">2 → 2</td></tr>
+        <tr><td>Arjun</td><td class="num">1 → 2 → 2</td><td class="num">2 → <b style="color:var(--gain)">3</b></td></tr>
+        <tr><td>Omar</td><td class="num">3 → <b style="color:var(--gain)">4</b> → 4</td><td class="num">3 → <b style="color:var(--gain)">4</b></td></tr>
+        <tr><td>Leila</td><td class="num">2 → 2 → <b style="color:var(--gain)">3</b></td><td class="num">3 → 3</td></tr>
+        <tr><td>Ayesha</td><td class="num">3 → 2 → <b style="color:var(--loss)">1</b></td><td class="num">2 → <b style="color:var(--loss)">1</b></td></tr>
+        <tr><td>Daniel</td><td class="num">2 → <b style="color:var(--loss)">1</b> → 1</td><td class="num">2 → <b style="color:var(--loss)">1</b></td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>What moved it</h3>
+      <ul class="list sm mt1">
+        <li><b>Up:</b> seeing your holdings change the answer (Omar), a refusal that was respected (Leila), maths you can open up (Arjun)</li>
+        <li><b>Down:</b> a risk question left unanswered (Maya), a requirement asked about and never resolved (Ayesha), a reserve invested and then a correction that failed (Daniel)</li>
+      </ul>
+      <div class="card soft mt3" style="padding:22px 26px">
+        <p style="font-size:17px">Arjun can follow the arithmetic and still not trust the assumptions behind it. Leila can appreciate that the company respected her refusal and still question the advice. <b>A good experience in one area doesn't settle the others.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scorecard -->
+<section class="slide" data-sec="19 What testing revealed"><div class="kicker"><b>19</b>What testing revealed</div>
+  <h1 class="md">Twelve areas, graded</h1>
+  <p class="sub mt1">These are reviewer judgements on the build that was tested, not customer ratings. The full 22-check results are in the appendix.</p>
+  <div class="cols c2 mt3" style="gap:40px">
+    <table class="dense">
+      <tr><th>Area</th><th>Assessment</th></tr>
+      <tr><td>Getting started</td><td><span class="pill w">Needs refinement</span></td></tr>
+      <tr><td>Answering the questions</td><td><span class="pill w">Needs refinement</span></td></tr>
+      <tr><td>Understanding the recommendation</td><td><span class="pill m">Major issue</span></td></tr>
+      <tr><td>Telling the products apart</td><td><span class="pill w">Needs refinement</span></td></tr>
+      <tr><td>Trusting the AI</td><td><span class="pill m">Major issue</span></td></tr>
+      <tr><td>Trusting the specific advice</td><td><span class="pill m">Major issue</span></td></tr>
+    </table>
+    <table class="dense">
+      <tr><th>Area</th><th>Assessment</th></tr>
+      <tr><td>Understanding fees</td><td><span class="pill w">Needs refinement</span></td></tr>
+      <tr><td>Understanding access to the money</td><td><span class="pill m">Major issue</span></td></tr>
+      <tr><td>Portfolio permission</td><td><span class="pill w">Needs refinement</span></td></tr>
+      <tr><td>Splitting cash and investments</td><td><span class="pill m">Major issue</span></td></tr>
+      <tr><td>Asking follow-up questions</td><td><span class="pill m">Major issue</span></td></tr>
+      <tr><td>Overall confidence in the decision</td><td><span class="pill w">Needs refinement</span></td></tr>
+    </table>
+  </div>
+  <p class="cap mt3">22 checks: 13 passed · 2 partial · 2 failed · 2 blocked · 1 unavailable · 1 changed behaviour · 1 unverified. The final “Confirm and pay” was blocked by the model's own approval safeguard, so the post-payment states are unverified.</p>
+</section>
+
+<!-- Limits -->
+<section class="slide" data-sec="19 What testing revealed"><div class="kicker"><b>19</b>What testing revealed</div>
+  <div class="split">
+    <div>
+      <h1 class="md">What this testing can't tell us</h1>
+      <ul class="list cross sm mt3">
+        <li>Whether a real Maya would ask about loss, or just carry on without noticing what she doesn't understand</li>
+        <li>Whether Arjun leaving to research means lost trust, or is just how he decides responsibly</li>
+        <li>Whether people separate what the <em>company</em> holds from what the <em>advisor</em> can use</li>
+        <li>What counts as enough evidence for a strict compliance requirement</li>
+        <li>Whether anyone would act with meaningful money</li>
+      </ul>
+    </div>
+    <div>
+      <h3>The limits of the study, stated plainly</h3>
+      <ul class="list sm mt1">
+        <li>Desktop Chrome at mobile width. Not a real phone, not a screen reader, not keyboard only</li>
+        <li>Returning journeys used the fixed AED 26,000 demo portfolio, not Omar's fictional AED 71,000</li>
+        <li>Final payment, goal chips, new-holding concentration checks and reduced motion: unverified</li>
+        <li>Product claims, regulatory status and backend controls were not independently audited</li>
+        <li>No build identifier recorded. Demo dates not independently checked</li>
+      </ul>
+      <p class="cap mt3">The five biggest unknowns are still emotional trust, willingness to act with real money, actual privacy choices, how people interpret risk, and the real decision to continue, compare or leave.</p>
+    </div>
+  </div>
+  <div class="notes">Bridge: "So that's what the testing found. Now here's what I did about it."</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">20<small>Improvements, round 2</small></div>
+    <div>
+      <h1>Here's what the testing made me change</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>Six journeys, five themes, and one critical failure: the product had recommended investing money a person needed for a medical bill. I had a list of findings ranked by how much damage each one could do.</p></div>
+        <div><span class="l">So I did this</span><p>Four design changes, each one traced to a specific finding, plus a handful of smaller fixes. And a rule I borrowed from the test report: I only call something fixed if I changed it and then retested it.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Change 1: reserve -->
+<section class="slide" data-sec="20 Changes after testing"><div class="kicker"><b>20</b>Changes after testing</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag loss">From Daniel's failure</span>
+      <h1 class="md mt2">Change 1. Set the reserve aside before recommending anything</h1>
+      <p class="lead sm">The advisor now separates money you have from money you can invest. When someone says they need part of it, that creates a reserve. It can never be read as a new budget.</p>
+      <div class="compare mt3">
+        <div><span class="ba before">Before</span><h3>“I need 2200” meant a new budget</h3><p style="font-size:16px">It recognised AED 3,000 and two months, and recommended all of it into gold. When he corrected it: AED 1,700 accessible, AED 500 in gold. The reserve was never protected.</p></div>
+        <div><span class="ba after">After</span><h3>“I need 2200” means a reserve</h3><p style="font-size:16px">The reserve is acknowledged first. The questions then run on the AED 800 that's left. That's below the property minimums, so it's gold or keep it accessible. Both are honest answers.</p></div>
+      </div>
+      <p class="cap mt3">Essential money recommended into an investment went from AED 2,200 to AED 0. I can say that because I retested it.</p>
+    </div>
+    <div class="phones"><div class="figure"><span class="ba after">After</span><div class="phone"><img src="assets/user/u_daniel_reserve.png" alt="Reserve acknowledged before recommending"></div><div class="cap">“AED 2,200 is for medical emergency, so I'll keep that out of any investment.”</div></div></div>
+  </div>
+</section>
+
+<!-- Change 2: ceiling -->
+<section class="slide" data-sec="20 Changes after testing"><div class="kicker"><b>20</b>Changes after testing</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag warn">From the audit, confirmed in testing</span>
+      <h1 class="md mt2">Change 2. The amount someone states is a ceiling</h1>
+      <p class="lead sm">No extra cost without an explicit choice. My first attempt added a “put fees on top” toggle. That read like an upsell, so it went. Now fees come out of the amount, and if that would push the investment below a minimum, the advisor asks first.</p>
+      <div class="cols c2 mt3" style="gap:20px">
+        <div class="card" style="padding:22px 26px"><span class="n">AED 20,000</span><p class="num" style="font-size:20px">19,801 + 198 = 19,999</p><p class="cap">Same figures on the card and at review. Observed in testing.</p></div>
+        <div class="card soft" style="padding:22px 26px"><span class="n">AED 500</span><p style="font-size:17px">“You'd need to spend AED 505 to invest AED 500.” Then two buttons: <b>Spend AED 505</b> or <b>Change amount</b></p><p class="cap">The test report called this a useful budget boundary.</p></div>
+      </div>
+      <p class="cap mt3">Totals above the stated budget went from every property recommendation to none. This is the safest claim in the deck because it's already fixed and was observed working.</p>
+    </div>
+    <div class="phones"><div class="figure"><span class="ba after">After</span><div class="phone"><img src="assets/user/u_review.png" alt="Fees inside the ceiling"></div><div class="cap">“Fees are taken from your AED 20,000.”</div></div></div>
+  </div>
+</section>
+
+<!-- Change 3: personalisation -->
+<section class="slide" data-sec="20 Changes after testing"><div class="kicker"><b>20</b>Changes after testing</div>
+  <div class="split wide-right">
+    <div class="phones">
+      <div class="figure"><span class="ba after">After</span><div class="phone sm"><img src="assets/user/u_portfolio.png" alt="Portfolio nudge"></div><div class="cap">Portfolio: “1 thing worth a look”</div></div>
+      <div class="figure"><span class="ba after">After</span><div class="phone sm"><img src="assets/user/u_insights.png" alt="Permission then a named insight"></div><div class="cap">Permission first, then an insight you can act on</div></div>
+    </div>
+    <div>
+      <span class="tag tok">From my own runs, plus Omar and Leila</span>
+      <h1 class="md mt2">Change 3. Personalisation the user can point to</h1>
+      <p class="lead sm">In my own runs, “Review my portfolio” replayed an old recommendation, and the holdings were double-counted to AED 39,602. It was either broken or showing data before asking for it.</p>
+      <ul class="list sm mt3">
+        <li>Every use of holdings now shows up as a specific change the user can name: “It also spreads you beyond Business Bay”, with the Business Bay listings left out</li>
+        <li>Declining keeps the full journey and produces no second ask. Verified on both asks in Leila's run</li>
+        <li>Still open: the returning entry screen shows portfolio totals before consent. The boundary copy has to match what the advisor can actually see</li>
+      </ul>
+      <p class="cap mt3">Portfolio review went from broken to three insights plus listings that know which area you're already in.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Change 4: identities -->
+<section class="slide" data-sec="20 Changes after testing"><div class="kicker"><b>20</b>Changes after testing</div>
+  <div class="split wide-left">
+    <div>
+      <span class="tag">From Arjun · “Telling the products apart” needed refinement</span>
+      <h1 class="md mt2">Change 4. Give each product its own identity</h1>
+      <p class="lead sm">Fractional and tokenised property shared one layout, one indigo badge and one surface. Only the words changed. My panel predicted the problem: when the two look alike, Arjun goes looking for the structural difference somewhere else.</p>
+      <div class="cols c3 mt3" style="gap:16px">
+        <div class="card" style="padding:20px;border-top:6px solid var(--frac)"><span class="tag" style="font-size:12px">Fractional property</span><p class="mt1" style="font-size:15px">Own a share of a Dubai property. Exit windows every 6 months after month 12.</p></div>
+        <div class="card" style="padding:20px;border-top:6px solid var(--tok)"><span class="tag tok" style="font-size:12px">Tokenised property</span><p class="mt1" style="font-size:15px">Own tokens in Dubai property. Built for 18-month to 3-year holds.</p></div>
+        <div class="card" style="padding:20px;border-top:6px solid var(--gold)"><span class="tag gold" style="font-size:12px">Gold</span><p class="mt1" style="font-size:15px">Buy, hold, sell any day. No rental income. Not a replacement for cash.</p></div>
+      </div>
+    </div>
+    <div class="phones"><div class="figure"><span class="ba after">After</span><div class="phone"><img src="assets/user/u_gold_6000.png" alt="Gold card with its own identity"></div><div class="cap">Gold now has its own colour on the icon, the badge and the card edge, and it says the price can fall.</div></div></div>
+  </div>
+</section>
+
+<!-- Change 4: before / after screens -->
+<section class="slide" data-sec="20 Changes after testing"><div class="kicker"><b>20</b>Changes after testing</div>
+  <h1 class="md" style="font-size:40px">Change 4, on the screens. Tokenised property and gold, before and after</h1>
+  <p class="sub mt1">Before, every product got the indigo badge and the same card. After, each one has its own colour on the icon, the badge and the card edge, and copy that says what makes it different.</p>
+  <div class="phones mt2" style="gap:28px;align-items:flex-start">
+    <div class="figure"><span class="ba before">Before · Tokenised</span><div class="phone sm" style="width:270px"><img src="assets/shots/home.png" alt="Invest home before: tokenised and fractional look identical"></div><div class="cap" style="max-width:270px">Same chips, same card as fractional. Only the words differed</div></div>
+    <div class="figure"><span class="ba after">After · Tokenised</span><div class="phone sm" style="width:270px"><img src="assets/shots/tok_after.png" alt="Tokenised recommendation card after: lime edge, token icon, VARA badge"></div><div class="cap" style="max-width:270px">Own edge and token icon, “Regulated by VARA”, ownership counted in tokens</div></div>
+    <div class="figure"><span class="ba before">Before · Gold</span><div class="phone sm" style="width:270px"><img src="assets/user/u_gold_3000.png" alt="Gold card before: indigo badge, same layout as property"></div><div class="cap" style="max-width:270px">Indigo badge, property layout, nothing about the price falling</div></div>
+    <div class="figure"><span class="ba after">After · Gold</span><div class="phone sm" style="width:270px"><img src="assets/user/u_gold_6000.png" alt="Gold card after: gold badge, icon and edge, says the price can fall"></div><div class="cap" style="max-width:270px">Gold icon, badge and edge. Grams, not a share. Says the price can fall</div></div>
+  </div>
+</section>
+
+<!-- Small fixes -->
+<section class="slide" data-sec="20 Changes after testing"><div class="kicker"><b>20</b>Changes after testing</div>
+  <div class="split wide-left">
+    <div>
+      <h1 class="md">Plus three smaller fixes from the report</h1>
+      <p class="sub mt1">Small on their own. Each one closes a specific misunderstanding one of the personas had.</p>
+      <table class="mt3">
+        <tr><th style="width:58%">Change</th><th>Who it helps</th></tr>
+        <tr><td>The scenario heading now reads “Estimated gain or loss after 3 years, after all fees”, with plus and minus signs, and the 6% rent assumption stated above the figures</td><td>Maya shouldn't have to open the maths to know what the number means</td></tr>
+        <tr><td>The split is explained next to the amounts: accessible cash is not invested, and gold can lose value even though it has no lock-in</td><td>Daniel. Being able to get the money out is not the same as it being safe</td></tr>
+        <tr><td>Every alternative gets a fair introduction: what it's for, then why it lost here</td><td>Maya and Arjun. “Gold doesn't make money” is the wrong thing to take away</td></tr>
+      </table>
+    </div>
+    <div class="phones"><div class="figure"><span class="ba after">After</span><div class="phone"><img src="assets/user/u_scenarios.png" alt="Relabelled scenario card"></div><div class="cap">Four outcomes, each with a sign. “Scenario, not a prediction” appears twice.</div></div></div>
+  </div>
+  <p class="cap mt2">What I'm not claiming as fixed: the Shariah confirmation, ordinary risk questions like “Can I lose my money?”, and portfolio facts shown before permission. The full open list is in the appendix.</p>
+  <div class="notes">Bridge: "So that's where the product stands. Let me show you the whole thing end to end as it is today."</div>
+</section>
+
+<!-- Product reveal -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">21<small>The product</small></div>
+    <div>
+      <h1>So this is where the product landed</h1>
+      <div class="bridge">
+        <div><span class="l">The line I'd put on it</span><p>Three options. One recommendation built around you. Understand why it fits, ask anything, and invest when you're ready, or don't.</p></div>
+        <div><span class="l">What you're about to see</span><p>The six screens that carry the whole journey, then what happens after the money moves, and a few smaller decisions I made along the way that I think are worth talking about.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section class="slide" data-sec="21 Product reveal"><div class="kicker"><b>21</b>Product reveal</div>
+  <h1 class="md">The product, end to end</h1>
+  <div class="phones" style="justify-content:space-between;align-items:flex-start;margin-top:40px;gap:24px">
+    <div class="figure"><div class="phone xs"><img src="assets/shots/entry.png" alt="Entry"></div><div class="cap">The invitation</div></div>
+    <div class="figure"><div class="phone xs"><img src="assets/user/u_rec_grid.png" alt="Recommendation"></div><div class="cap">One recommendation</div></div>
+    <div class="figure"><div class="phone xs"><img src="assets/shots/rec_why.png" alt="Others"></div><div class="cap">Why the others lost</div></div>
+    <div class="figure"><div class="phone xs"><img src="assets/shots/split.png" alt="Split"></div><div class="cap">The split</div></div>
+    <div class="figure"><div class="phone xs"><img src="assets/shots/insights.png" alt="Insights"></div><div class="cap">Knows what you hold</div></div>
+    <div class="figure"><div class="phone xs"><img src="assets/user/u_review.png" alt="Review"></div><div class="cap">Review before you pay</div></div>
+  </div>
+</section>
+
+<!-- After the money moves -->
+<section class="slide" data-sec="21 Product reveal"><div class="kicker"><b>21</b>Product reveal</div>
+  <div class="split wide-right">
+    <div class="phones">
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_confirm_grid.png" alt="Ownership confirmed"></div><div class="cap">The share record, then what happens next</div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_goal_sheet.png" alt="Goal sheet"></div><div class="cap">Which goal is this for? Asked afterwards, skippable</div></div>
+      <div class="figure"><div class="phone sm"><img src="assets/user/u_plan.png" alt="Investing plan"></div><div class="cap">Now · Next · Later</div></div>
+    </div>
+    <div>
+      <span class="tag lime">After the money moves</span>
+      <h1 class="md mt2">The advisor doesn't stop at the purchase confirmation. The next screen helps you decide which goal this investment belongs to</h1>
+      <p class="lead sm">The confirmation names the share (“about 2.02% of Studio apartment in Business Bay”), repeats the same three cost figures, and turns the future into dates: first rent, first exit window. Then a bottom sheet asks what this money is for, so the investment gets tagged to a goal.</p>
+      <ul class="list sm mt3">
+        <li>The goal is asked once the decision is made, never as a gate in front of it. You can skip it</li>
+        <li>Tagging a goal is what lets the advisor check in later: “what would change this” becomes a reminder tied to something you care about</li>
+        <li>An investing plan turns the next step into a list: <em>add money I can reach any day</em> now, then tokenised property later</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Nuanced solves -->
+<section class="slide" data-sec="22 Nuanced decisions"><div class="kicker"><b>22</b>Nuanced decisions</div>
+  <h1 class="md">Six smaller decisions I'd like to talk about</h1>
+  <p class="sub mt1">None of these is the headline. Each one took real thought.</p>
+  <div class="cols c3 mt3" style="gap:24px">
+    <div class="card"><span class="n">Where the AI sits</span><h3>Under the products, not instead of them</h3><p>The advisor is a layer over the catalogue, entered from the Invest home. It never replaces browsing.</p></div>
+    <div class="card"><span class="n">The empty state</span><h3>An empty portfolio points you to the advisor</h3><p>“You don't hold any investments yet” comes with <em>Ask the advisor</em>, so the empty screen leads to a decision.</p></div>
+    <div class="card soft"><span class="n">Permission</span><h3>Ask first, scope it, make no a real answer</h3><p>Reading your holdings is asked for at the moment it's needed, with the reason attached. It is separate from any other consent.</p></div>
+    <div class="card"><span class="n">The reveal</span><h3>One animation, everything else quiet</h3><p>The checks tick in, then the card lands. That is the only orchestrated motion in the product.</p></div>
+    <div class="card"><span class="n">Goal tagging</span><h3>After the money moves, not before</h3><p>An optional sheet after confirmation, not a gate at review. It feeds later check-ins.</p></div>
+    <div class="card"><span class="n">Gold copy</span><h3>“Reachable” is not the same as “safe”</h3><p>The split says accessible cash is not invested, and gold can lose value even though you can sell it any day.</p></div>
+  </div>
+  <div class="notes">Bridge: "Last two things. How I'd know if this is working once it's live, and what I'd do next." Detail if asked: chatbot placement and empty-state benchmarks; consent literature on progressive, separate, revocable consents; goal sheet pattern borrowed from Wahed.</div>
+</section>
+
+<!-- Divider -->
+<section class="slide divider nobrand">
+  <div class="body">
+    <div class="bignum">23<small>Metrics and roadmap</small></div>
+    <div>
+      <h1>How I'd know it's working once real people use it</h1>
+      <div class="bridge">
+        <div><span class="l">Where I was</span><p>A product that had been audited and tested, with a clear list of what's fixed and what isn't. The next question a PM would ask me is how we'd measure it. So I answered that before anyone asked.</p></div>
+        <div><span class="l">So I did this</span><p>I went back to the data model. The Recommendation table is both the compliance record and the metrics table, and nothing ever writes over it. That means every metric on the next slide can be answered from day one.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Metrics -->
+<section class="slide" data-sec="23 Success metrics"><div class="kicker"><b>23</b>Success metrics</div>
+  <h1 class="md">Five metrics, all of them coming off one table</h1>
+  <div class="cols c5 mt3" style="gap:18px">
+    <div class="card" style="padding:26px 22px"><span class="n">01 · Conversion</span><h3 style="font-size:20px">Recommendation to invest</h3><p style="font-size:15px">Do people who reach a recommendation invest at a higher rate than people browsing products directly? This tests whether the recommendation actually converts.</p></div>
+    <div class="card soft" style="padding:26px 22px"><span class="n">02 · Return</span><h3 style="font-size:20px">Coming back for a second decision</h3><p style="font-size:15px">This tests whether they trusted the first one. It's the assumption the whole product rests on.</p></div>
+    <div class="card" style="padding:26px 22px"><span class="n">03 · Splits and no's</span><h3 style="font-size:20px">Share of sessions ending in a split or “not now”</h3><p style="font-size:15px">Tracked from day one. I'd want the tolerable range agreed before launch, because someone will ask.</p></div>
+    <div class="card" style="padding:26px 22px"><span class="n">04 · Permission</span><h3 style="font-size:20px">Portfolio-access grant rate</h3><p style="font-size:15px">Tells us whether the ask is worded well, and reads directly on how much people trust the product.</p></div>
+    <div class="card" style="padding:26px 22px"><span class="n">05 · Hand-off</span><h3 style="font-size:20px">Drop-off between recommendation and listing tap</h3><p style="font-size:15px">If they read it and never tap, the narrowing isn't working. The hand-off is the problem, not the advice.</p></div>
+  </div>
+  <p class="cap mt3">Plus one health metric that came straight out of testing: drop-off at any question that falls back to “I didn't catch that.” Every one of those is a Maya moment.</p>
+</section>
+
+<!-- Roadmap -->
+<section class="slide" data-sec="24 Roadmap"><div class="kicker"><b>24</b>Roadmap</div>
+  <h1 class="md">The roadmap. What's in the MVP, and what waits until the metrics earn it</h1>
+  <div class="cols c2 mt3" style="gap:40px">
+    <div class="card soft" style="border:2px solid var(--indigo)">
+      <span class="n">MVP · what the prototype shows today</span>
+      <ul class="list sm mt2">
+        <li>A hybrid advisor: tap or type, fixed rules pick, the AI explains</li>
+        <li>One recommendation, the other two “for later”, fees in dirhams, scenarios that always include a loss</li>
+        <li>Reserve before recommend · Shariah as a filter · portfolio review by permission, which leads to insights</li>
+        <li>Review before paying, and a human fallback for questions out of scope</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="n">V2 · about six months on, once metrics 01 and 02 have moved</span>
+      <ul class="list ind sm mt2">
+        <li><b>Help with exits and selling.</b> Sell-now versus hold maths before an exit window, and help listing tokens</li>
+        <li><b>Retention.</b> Opt-in check-ins, progress against the remembered goal, what to do with rent received</li>
+        <li><b>A deeper human fallback.</b> “Talk to a person” hands off to a licensed advisor for large amounts and tax questions</li>
+        <li><b>Property consultation.</b> Referral to a human expert for buying a whole property</li>
+      </ul>
+    </div>
+  </div>
+  <p class="cap mt3">I prioritised this MoSCoW-style. Everything in the MVP is a Must or a Should. V2 stays a Could until the first two metrics move.</p>
+</section>
+
+<!-- Real user research -->
+<section class="slide" data-sec="25 Next: real users"><div class="kicker"><b>25</b>Next: real users</div>
+  <div class="split">
+    <div>
+      <h1 class="md">And the step I'd take next: real users</h1>
+      <p class="lead sm">Hypothetical money, no real transactions. I'd watch what people do, not just what they say. “I like it” doesn't tell me they understood the decision.</p>
+      <div class="card soft mt3" style="padding:22px 26px">
+        <p style="font-size:17px"><b>I'd recruit on decision confidence, not on income.</b> UAE residents with money ready to invest, under a year of experience, who can't choose between the options in front of them. The AED 3,000 a month figure stays as a persona filter only.</p>
+      </div>
+    </div>
+    <ul class="list ind sm">
+      <li>Can beginners explain the recommendation back to me? What it is, why it fits, how they could lose money, what they'd do next</li>
+      <li>Do the clearer scenario labels stop the “is that my gain or my total?” confusion?</li>
+      <li>Do people notice the scenarios assume rent keeps coming?</li>
+      <li>Can they tell the difference between cash kept accessible and gold that can be sold but might lose value?</li>
+      <li>Do they notice when an essential expense hasn't been protected?</li>
+      <li>After declining access, do they believe they can still get useful advice?</li>
+      <li>After granting it, can they say what changed because of their holdings?</li>
+      <li>What counts as enough evidence for a strict compliance requirement?</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Close -->
+<section class="slide divider nobrand">
+  <div class="body" style="grid-template-columns:1fr">
+    <div>
+      <div class="section-num">Where I landed</div>
+      <h1>Getting to an answer is easy. Knowing it's the right answer for you is the product</h1>
+      <p class="lead" style="max-width:1300px">Testing is what separated an experience that looked finished from the moments where it still had to earn trust. If I took this into a real build, I'd take these things with me: rules that choose, a model that explains, a reserve set aside before any recommendation, and a product that is willing to say “not this money, not now.”</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide nobrand">
+  <div class="body center">
+    <h1 class="xl">Thank you</h1>
+    <p class="lead" style="font-size:30px;color:var(--ink);margin-top:16px">By Bisma Munawar</p>
+    <p class="lead sm mt2">Happy to take questions. The appendix is right behind this slide if you want the tables.</p>
+    <div class="links mt3">
+      <div><span class="l">Fully wired prototype</span><a href="https://investmentadvisordxb.lovable.app/" target="_blank" rel="noopener">https://investmentadvisordxb.lovable.app/</a></div>
+      <div><span class="l">Design system at Lovable</span><a href="https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ" target="_blank" rel="noopener">https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ</a></div>
+    </div>
+    <p class="cap mt3" style="font-family:var(--mono)">Research corpus · PRD · brand guidelines · synthetic test report, all available on request</p>
+  </div>
+</section>
+
+<!-- Appendix divider -->
+<section class="slide nobrand" style="background:var(--surface-2)">
+  <div class="body center">
+    <div class="section-num">Appendix</div>
+    <h1 class="xl">The reference tables</h1>
+    <p class="lead">Everything I kept out of the main story so it could flow. Research sources, the full competitor table, published facts, the hypothesis scorecard, Kano detail, all 22 checks, the 12-area scorecard, the data model and the list of what is still open.</p>
+  </div>
+</section>
+
+<!-- A1 Sources -->
+<section class="slide" data-sec="A1 Research sources"><div class="kicker"><b>A1</b>Research sources</div>
+  <h2>Where the customer voice came from, and what I left out</h2>
+  <table class="dense mt2">
+    <tr><th style="width:22%">Source</th><th>Outcome</th></tr>
+    <tr><td>Reddit</td><td>Strongest source of recent UAE retail-investor customer voice.</td></tr>
+    <tr><td>Trustpilot</td><td>Useful for Stake, SmartCrowd, Sarwa, Wahed and OGold customer experience. Individual reviews aren't representative of whole platforms.</td></tr>
+    <tr><td>LinkedIn posts/comments</td><td>Useful for tokenised-property questions on ownership, liquidity, mechanics. Commenters can't always be verified as target users.</td></tr>
+    <tr><td>Hacker News</td><td>AI-investment trust, explainability and proof concerns. Adjacent, not UAE-specific.</td></tr>
+    <tr><td>Indie Hackers · Product Hunt</td><td>Adjacent evidence on ChatGPT workarounds, financial context, personalisation and confidence in AI investing tools.</td></tr>
+    <tr><td>Industry forums</td><td>UAE investing communities, incl. SimplyFI / Bogleheads-style DIY alternatives.</td></tr>
+    <tr><td>Quora</td><td>Searched; retrieval blocked by robots.txt. No unverifiable quotes included.</td></tr>
+    <tr><td>X/Twitter · YouTube</td><td>Public discussion exists but little reliable target-customer conversation on this three-product problem. Not used as primary voice.</td></tr>
+    <tr><td>G2 · Capterra</td><td>Categories are B2B software for banks/advisers, not UAE retail products. Excluded.</td></tr>
+  </table>
+</section>
+
+<!-- A2 Competitors 1 -->
+<section class="slide" data-sec="A2 Competitive landscape · 1/2"><div class="kicker"><b>A2</b>Competitive landscape · 1/2</div>
+  <h2>Direct alternatives</h2>
+  <table class="dense mt2">
+    <tr><th style="width:13%">Alternative</th><th style="width:12%">Type</th><th>Does well</th><th>Customer complaints / weaknesses</th><th style="width:14%">Access</th><th>Gap vs. the advisor hypothesis</th></tr>
+    <tr><td>Stake</td><td>Fractional property</td><td>Low-entry Dubai property, fractional ownership, AutoInvest</td><td>Liquidity, vacant properties / rent interruptions, regret over concentration</td><td>AED 500; published fee stack</td><td>Helps select property; doesn't solve gold vs tokenised vs fractional</td></tr>
+    <tr><td>SmartCrowd</td><td>Fractional property</td><td>Low-ticket Dubai property exposure</td><td>Fees, lock-up, exit economics</td><td>AED 500; published fees</td><td>User still decides whether fractional is right for them at all</td></tr>
+    <tr><td>OGold</td><td>Digital gold</td><td>Gold without storage friction</td><td>Tiny review sample; support/transparency concerns</td><td>Very low entry</td><td>Solves access to gold, not whether gold fits</td></tr>
+    <tr><td>Emirates Islamic</td><td>Bank-embedded gold</td><td>Gold/silver inside an existing banking app</td><td>Little feature-level review evidence</td><td>Embedded</td><td>Great in-app access benchmark; no cross-asset recommendation layer</td></tr>
+    <tr><td>Sarwa Invest</td><td>Robo adviser</td><td>Questions → risk profile → managed portfolio; reviews praise clarity and advisers</td><td>Strong counter-evidence to “digital products lack guidance”</td><td>USD 500; management fee</td><td>Allocation inside its own universe, not this choice</td></tr>
+    <tr><td>StashAway</td><td>Robo adviser</td><td>Managed diversified portfolios, multiple risk levels</td><td>Less relevant for UAE real-world assets</td><td>No minimum; tiered fees</td><td>Substitute for users who don't want to pick alternatives</td></tr>
+    <tr><td>Wahed</td><td>Robo · Shariah</td><td>Beginner-friendly halal investing</td><td>USD-only funding, withdrawal timing; human support valued</td><td>USD 500; annual fee</td><td>Shows goal/risk-based digital investing is already familiar</td></tr>
+  </table>
+</section>
+
+<!-- A3 Competitors 2 -->
+<section class="slide" data-sec="A3 Competitive landscape · 2/2"><div class="kicker"><b>A3</b>Competitive landscape · 2/2</div>
+  <h2>Indirect alternatives and workarounds</h2>
+  <table class="dense mt2">
+    <tr><th style="width:16%">Alternative</th><th style="width:14%">Type</th><th>Does well</th><th>Weakness</th><th>Gap vs. the advisor hypothesis</th></tr>
+    <tr><td>Wio / integrated investing apps</td><td>Indirect</td><td>Convenience (“very convenient to use”)</td><td>Same user felt FX/commission economics outweighed convenience (perception, not audit)</td><td>Proves the value of keeping investing inside the existing journey</td></tr>
+    <tr><td>ChatGPT / general AI</td><td>Indirect</td><td>Conversational explanation, apparent personalisation</td><td>User must supply accurate context manually; no verified account or product data; can't execute</td><td>Embedded verified context + immediate action is the strongest advantage</td></tr>
+    <tr><td>Google / Reddit / communities</td><td>Non-software workaround</td><td>Huge volume of real experiences</td><td>Conflicting, generic, time-consuming</td><td>Doesn't convert the individual's circumstances into one answer</td></tr>
+    <tr><td>Friends / family</td><td>Human workaround</td><td>Familiar, trusted; ~half of surveyed UAE investors consult family</td><td>Opinion-based, not aligned to exact goals/products</td><td>Emotional trust that AI may not replicate. This is why there's a human fallback</td></tr>
+    <tr><td>Manual comparison in-app</td><td>Product workaround</td><td>Direct access to facts, pricing, risk</td><td>User does the translation into a personal choice</td><td>This is the exact decision layer the advisor improves</td></tr>
+    <tr><td>Cash / do nothing</td><td>Incumbent behaviour</td><td>Simple, preserves liquidity</td><td>May fail longer-term goals</td><td>The advisor must first establish the money is suitable to invest</td></tr>
+  </table>
+</section>
+
+<!-- A4 Published facts -->
+<section class="slide" data-sec="A4 Published facts"><div class="kicker"><b>A4</b>Published facts</div>
+  <h2>Competitor facts as published, at time of research</h2>
+  <table class="dense mt2">
+    <tr><th></th><th>Stake</th><th>SmartCrowd</th><th>Sarwa Invest</th><th>StashAway</th><th>Wahed</th><th>ChatGPT</th></tr>
+    <tr><td>Type</td><td>Fractional property</td><td>Fractional property</td><td>Assisted adviser flow</td><td>Assisted adviser flow</td><td>Assisted, halal only</td><td>General AI</td></tr>
+    <tr><td>Minimum</td><td>AED 500</td><td>AED 500</td><td>USD 500</td><td>None (General Investing)</td><td>USD 500</td><td>None</td></tr>
+    <tr><td>Published fees</td><td>1.5% entry · 0.5% annual admin · 0.2% then 0.1% KYC/AML · 2.5% exit · 7% on appreciation</td><td>1.5% entry · 0.5% annual admin · 2.5% exit</td><td>0.85% annual (tiering disputed)</td><td>0.2%–0.8% annual</td><td>0.99% under USD 250k · 0.49% above</td><td>None</td></tr>
+    <tr><td>Exit route</td><td>1-yr lock-in, then two-week windows each May &amp; Nov; 3–5 yr recommended hold</td><td>Share Transfer Facility, two-week windows each Mar &amp; Sep, or sale by vote</td><td>Withdraw anytime</td><td>No lock-ins</td><td>No lock-in</td><td>n/a</td></tr>
+    <tr><td>Shariah option</td><td>Yes (DFSA Islamic Window + certification)</td><td>Yes (Shariyah Review Bureau)</td><td>Yes (halal portfolio, same fee)</td><td>Yes (Shariah Global Portfolio)</td><td>Halal by construction</td><td>No</td></tr>
+    <tr><td>Questions → recommendation</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Conversational only</td></tr>
+  </table>
+</section>
+
+<!-- A5 Hypothesis scorecard -->
+<section class="slide" data-sec="A5 Hypothesis scorecard"><div class="kicker"><b>A5</b>Hypothesis scorecard</div>
+  <h2>Eighteen founding hypotheses against the research</h2>
+  <div class="cols c2 mt2" style="gap:32px">
+    <table class="dense">
+      <tr><th>Hypothesis</th><th style="width:34%">Verdict</th></tr>
+      <tr><td>UAE beginner investors struggle to choose</td><td><span class="pill g">Supported (qual.)</span></td></tr>
+      <tr><td>People with a few thousand AED/month experience this</td><td><span class="pill g">Supported</span></td></tr>
+      <tr><td>AED 3,000/month is the correct threshold</td><td><span class="pill m">Unvalidated</span></td></tr>
+      <tr><td>Ages 22–48 are the correct segment</td><td><span class="pill m">Unvalidated</span></td></tr>
+      <tr><td>Beginner / &lt;1 yr is a promising pain segment</td><td><span class="pill a">Directional</span></td></tr>
+      <tr><td>Users manually research online</td><td><span class="pill g">Supported</span></td></tr>
+      <tr><td>Users ask friends/family</td><td><span class="pill g">Supported</span></td></tr>
+      <tr><td>Users use ChatGPT</td><td><span class="pill g">Supported (qual.)</span></td></tr>
+      <tr><td>Users may delay / do nothing</td><td><span class="pill w">Plausible, weaker</span></td></tr>
+    </table>
+    <table class="dense">
+      <tr><th>Hypothesis</th><th style="width:34%">Verdict</th></tr>
+      <tr><td>Risk, liquidity, fees, horizon drive decisions</td><td><span class="pill g">Supported</span></td></tr>
+      <tr><td>Exact three-product choice is common</td><td><span class="pill m">Unvalidated</span></td></tr>
+      <tr><td>Users want personally relevant guidance</td><td><span class="pill g">Supported</span></td></tr>
+      <tr><td>AI is an acceptable interface</td><td><span class="pill a">Directional</span></td></tr>
+      <tr><td>Users will follow one AI recommendation</td><td><span class="pill m">Unvalidated</span></td></tr>
+      <tr><td>Explainability matters for trust</td><td><span class="pill a">Desired attribute</span></td></tr>
+      <tr><td>Embedded context beats generic AI</td><td><span class="pill s">Strong hypothesis</span></td></tr>
+      <tr><td>AI recommendation reduces churn</td><td><span class="pill m">Unvalidated</span></td></tr>
+      <tr><td>AI recommendation improves conversion</td><td><span class="pill m">Unvalidated</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- A6 Kano basics -->
+<section class="slide" data-sec="A6 Kano detail · basics"><div class="kicker"><b>A6</b>Kano detail · basics</div>
+  <h2>Basics: expected, earn nothing, and their absence ends the conversation</h2>
+  <table class="dense mt2">
+    <tr><th style="width:26%">Benefit</th><th>Why it sits here</th></tr>
+    <tr><td>Explain products in plain language</td><td>Literacy varies inside a single thread: one person suggests the S&amp;P 500, the next asks what it is. Every competitor writes beginner copy.</td></tr>
+    <tr><td>Show how and when money can be withdrawn</td><td>Most-raised concern. A fractional platform's own data showed 26% seller liquidity in one exit window. Most people who listed didn't sell.</td></tr>
+    <tr><td>Show all fees, not the headline</td><td>The objection is late discovery, not cost. Competitors publish full tables; match, don't lead.</td></tr>
+    <tr><td>State the downside honestly</td><td>An investor never shown a bad year is the one who sells during one. Also a compliance expectation.</td></tr>
+    <tr><td>Cite where product facts come from</td><td>Nobody praises a citation. Advice without one isn't advice.</td></tr>
+    <tr><td>Keep the question set short</td><td>UAE robo-advisers already onboard briefly. Every extra question loses people.</td></tr>
+    <tr><td>Invest without leaving the app</td><td>Several UAE apps already do it. Handing off elsewhere destroys the value just created.</td></tr>
+    <tr><td>Shariah compliance status</td><td>Absolute for those who need it, weightless otherwise. A filter, asked early. Not a feature.</td></tr>
+    <tr><td>Accountability · data control</td><td>Which entity stands behind the advice, under what permission. Noticed only when broken.</td></tr>
+  </table>
+</section>
+
+<!-- A7 Kano performance -->
+<section class="slide" data-sec="A7 Kano detail · performance"><div class="kicker"><b>A7</b>Kano detail · performance</div>
+  <h2>Performance dimensions: more is better, with no ceiling</h2>
+  <table class="dense mt2">
+    <tr><th style="width:28%">Benefit</th><th>Why it sits here</th></tr>
+    <tr><td>Give one clear recommendation</td><td>Strongest signal. AED 320,000 and AED 30,000. Both had money ready, neither could choose.</td></tr>
+    <tr><td>Explain why the other options lost</td><td>A recommendation without comparison reads as a sales pitch. Comparison makes it a decision the user can defend later.</td></tr>
+    <tr><td>Translate mechanics into personal consequences</td><td>“One-year lock-in” vs. “you said you might need this in six months, so this doesn't suit you.” Same fact, different job.</td></tr>
+    <tr><td>Tokenised vs. fractional in practical terms</td><td>Explain what happens when they want their money back, not the legal architecture.</td></tr>
+    <tr><td>Support follow-up and challenge</td><td>“Impossible to test, hesitant to trust.” Depth of conversation separates an advisor from an algorithm.</td></tr>
+    <tr><td>Net outcome after fees and FX</td><td>“What will I receive in hand?” Headline percentages don't answer it.</td></tr>
+    <tr><td>State what would change the recommendation</td><td>Makes the advice feel considered rather than fixed, and gives a reason to return.</td></tr>
+    <tr><td>Human access at the point of commitment</td><td>HSBC 2026: 73% use AI for finance, 12% call it most influential. Reviews of UAE robo-advisers repeatedly praise human contact.</td></tr>
+    <tr><td>Build confidence · reduce overwhelm</td><td>“Helped me make the right decisions for my needs” is the sentence the product is trying to earn.</td></tr>
+  </table>
+</section>
+
+<!-- A8 Checks 1-11 -->
+<section class="slide" data-sec="A8 The 22 checks · 1–11"><div class="kicker"><b>A8</b>The 22 checks · 1–11</div>
+  <h2>Observed results, 10 to 11 September. A pass applies to visible behaviour only</h2>
+  <table class="dense mt2">
+    <tr><th style="width:4%">#</th><th style="width:26%">Check</th><th style="width:12%">Result</th><th>Observation</th></tr>
+    <tr><td>1</td><td>Tap AED 20,000 / 5-yr starter; no echo</td><td><span class="pill m">Fail</span></td><td>User-message echo and “Got it: AED 20,000, 5 years” both appeared. Reproduced after reset.</td></tr>
+    <tr><td>2</td><td>Type “I have 20k for 5 years”</td><td><span class="pill g">Pass</span></td><td>Exact acknowledgement and Edit appeared. Home composer initially timed out; full-chat composer worked.</td></tr>
+    <tr><td>3</td><td>Finish typed AED 20,000 journey</td><td><span class="pill w">Partial</span></td><td>Fractional; 19,801 / 198 / 19,999. AED 1 residual not explained.</td></tr>
+    <tr><td>4</td><td>Put fees on top instead</td><td><span class="pill s">Unavailable</span></td><td>No such control found. The toggle was removed after it read as an upsell.</td></tr>
+    <tr><td>5</td><td>5-yr fractional scenarios</td><td><span class="pill g">Pass</span></td><td>2,822 / 4,752 / 7,440 inline. No plus sign; heading doesn't say “net gain”.</td></tr>
+    <tr><td>6</td><td>“make it 30k”</td><td><span class="pill w">Pass, history issue</span></td><td>Updated and re-ran. Earlier scenario figures also changed above the edit.</td></tr>
+    <tr><td>7</td><td>AED 15,000 / 2 years</td><td><span class="pill g">Pass</span></td><td>Tokenised; 14,409 invested; fees 288 + 288 + 14. Total within AED 1 tolerance.</td></tr>
+    <tr><td>8</td><td>2-yr tokenised scenarios</td><td><span class="pill g">Pass</span></td><td>−432 / 994 / 3,134.</td></tr>
+    <tr><td>9</td><td>AED 500 / 4 years</td><td><span class="pill a">Changed behaviour</span></td><td>Stops first: “You'd need to spend AED 505.” Spend / Change amount. Useful safeguard.</td></tr>
+    <tr><td>10</td><td>AED 2,000 / few months starter</td><td><span class="pill g">Pass</span></td><td>1,500 accessible; 500 gold. Does not generalise to Daniel's message.</td></tr>
+    <tr><td>11</td><td>“okayy” while quick replies show</td><td><span class="pill m">Fail</span></td><td>“I didn't catch that” plus starters, rather than activating the first reply.</td></tr>
+  </table>
+</section>
+
+<!-- A9 Checks 12-22 -->
+<section class="slide" data-sec="A9 The 22 checks · 12–22"><div class="kicker"><b>A9</b>The 22 checks · 12–22</div>
+  <h2>Observed results, continued</h2>
+  <table class="dense mt2">
+    <tr><th style="width:4%">#</th><th style="width:26%">Check</th><th style="width:12%">Result</th><th>Observation</th></tr>
+    <tr><td>12</td><td>“what's the weather”</td><td><span class="pill g">Pass</span></td><td>Expected fallback with visible options.</td></tr>
+    <tr><td>13</td><td>“why real estate”</td><td><span class="pill g">Pass</span></td><td>Rent and appreciation alongside value loss, vacancy, tied-up money. Two follow-ups offered.</td></tr>
+    <tr><td>14</td><td>Recommendation → review → Not now</td><td><span class="pill g">Pass</span></td><td>Returns to chat with reassurance and Remind me later.</td></tr>
+    <tr><td>15</td><td>Confirm property investment</td><td><span class="pill w">Partial / blocked</span></td><td>Verification shown, returned to review. Final pay blocked by approval safeguard; post-pay states unverified.</td></tr>
+    <tr><td>16</td><td>Returning portfolio review / Yes</td><td><span class="pill g">Pass</span></td><td>Invested 26,000; value 26,480; rent 2,070; next date 15 Oct 2026.</td></tr>
+    <tr><td>17</td><td>Portfolio insights</td><td><span class="pill g">Pass</span></td><td>Exit window in 35 days; studio with no rent; 23,000 of 26,000 in Business Bay.</td></tr>
+    <tr><td>18</td><td>Should I sell at this window?</td><td><span class="pill g">Pass</span></td><td>Exit 258; receive ~10,022; overall 722 up. Asks whether money is needed within six months.</td></tr>
+    <tr><td>19</td><td>New investor's concentration notes</td><td><span class="pill s">Blocked</span></td><td>Requires a new holding after final confirmation. Not verified.</td></tr>
+    <tr><td>20</td><td>Decline permission and ask again</td><td><span class="pill g">Pass</span></td><td>“No problem. I'll go by what you tell me.” Both times. No second ask.</td></tr>
+    <tr><td>21</td><td>Bottom chart icon</td><td><span class="pill g">Pass</span></td><td>Opens Portfolio. Empty state includes Ask the advisor.</td></tr>
+    <tr><td>22</td><td>Reduce motion on, reload</td><td><span class="pill s">Unverified</span></td><td>No supported control in this browser session.</td></tr>
+  </table>
+</section>
+
+<!-- A10 Scorecard plain language -->
+<section class="slide" data-sec="A10 12-area scorecard"><div class="kicker"><b>A10</b>12-area scorecard</div>
+  <h2>Twelve areas, in plain language</h2>
+  <table class="dense mt2">
+    <tr><th style="width:26%">Area</th><th style="width:16%">Assessment</th><th>In plain language</th></tr>
+    <tr><td>Getting started</td><td><span class="pill w">Needs refinement</span></td><td>The invitation helps; a few interaction details still distract.</td></tr>
+    <tr><td>Answering questions</td><td><span class="pill w">Needs refinement</span></td><td>Straightforward answers work better than combined or nuanced messages.</td></tr>
+    <tr><td>Understanding the recommendation</td><td><span class="pill m">Major issue</span></td><td>Amount and time are explained, but important personal requirements can be missed.</td></tr>
+    <tr><td>Telling the products apart</td><td><span class="pill w">Needs refinement</span></td><td>Fees and timing are clearer than ownership and exit differences.</td></tr>
+    <tr><td>Trusting the AI</td><td><span class="pill m">Major issue</span></td><td>Basic concerns and corrections need more reliable responses.</td></tr>
+    <tr><td>Trusting the specific advice</td><td><span class="pill m">Major issue</span></td><td>A clear explanation cannot make up for overlooking an essential expense.</td></tr>
+    <tr><td>Understanding fees</td><td><span class="pill w">Needs refinement</span></td><td>Initial costs are strong; ongoing costs, rounding and leftover money need context.</td></tr>
+    <tr><td>Understanding access to money</td><td><span class="pill m">Major issue</span></td><td>No lock-in and an exit window can sound more certain than the explanation supports.</td></tr>
+    <tr><td>Portfolio permission</td><td><span class="pill w">Needs refinement</span></td><td>Declining works, but the boundary before consent is unclear.</td></tr>
+    <tr><td>Splitting cash and investments</td><td><span class="pill m">Major issue</span></td><td>The prepared example works; the personalised medical-expense case does not.</td></tr>
+    <tr><td>Asking follow-up questions</td><td><span class="pill m">Major issue</span></td><td>Prepared explanations help, but natural questions are not consistently understood.</td></tr>
+    <tr><td>Overall confidence</td><td><span class="pill w">Needs refinement</span></td><td>Reaching the answer is easier than knowing whether it is right for you.</td></tr>
+  </table>
+</section>
+
+<!-- A11 Understanding per person -->
+<section class="slide" data-sec="A11 Could they explain it back?"><div class="kicker"><b>A11</b>Could they explain it back?</div>
+  <h2>Understanding and trust by person (simulated judgements)</h2>
+  <table class="dense mt2">
+    <tr><th style="width:10%">Person</th><th>Understood the recommendation</th><th>Understood the alternatives</th><th>Main trust change</th></tr>
+    <tr><td>Maya</td><td>Partly</td><td>Incomplete; could read “no rent” as “no value”</td><td>A helpful start undermined by the unanswered risk question</td></tr>
+    <tr><td>Arjun</td><td>The fee-and-time argument</td><td>Still wanted structural evidence</td><td>Maths helped; missing evidence kept him cautious</td></tr>
+    <tr><td>Omar</td><td>Why another area was shown</td><td>Only partly the other product choices</td><td>Seeing his holdings affect the recommendation helped</td></tr>
+    <tr><td>Leila</td><td>The amount-and-time fit</td><td>Partly</td><td>Respecting refusal helped; pre-consent knowledge confused</td></tr>
+    <tr><td>Ayesha</td><td>Financial fit, not required eligibility</td><td>Partly</td><td>Asking about compliance without resolving it weakened confidence</td></tr>
+    <tr><td>Daniel</td><td>Saw the recommendation didn't protect his need</td><td>Some access differences, not cash certainty</td><td>The reserve mistake and failed correction undermined trust</td></tr>
+  </table>
+  <p class="cap mt3">Simulated outcomes: Maya postpones to ask someone she trusts · Arjun leaves to check terms · Omar keeps evaluating outside Business Bay · Leila uses Not now · Ayesha stops and checks elsewhere · Daniel rejects and stops.</p>
+</section>
+
+<!-- Data model + flow -->
+<section class="slide" data-sec="A12 Data model"><div class="kicker"><b>A12</b>Data model</div>
+  <h2>The data model. Two decisions in here matter more than the rest</h2>
+  <div class="cols c2" style="margin-top:36px;gap:48px;align-items:start">
+    <div>
+      <div class="diagram">
+        <div class="box"><b>Session</b>amount · needed_back_by · invested_before</div>
+        <div class="box"><b>Consent</b>scope: portfolio_read · granted · revoked_at · session_id</div>
+        <div class="box"><b>Holding</b>product_type · submarket · amount · income_received · lock_in_ends</div>
+        <div class="box"><b>Product</b>minimum · fee_components · exit_mechanism · shariah_status · source_url · verified_at</div>
+        <div class="box hi" style="grid-column:1/3"><b>Rules engine</b>decision + reason codes</div>
+        <div class="box hi" style="grid-column:1/3"><b>Model</b>4 fixed blocks · explanation only</div>
+        <div class="box dark" style="grid-column:1/3"><b>Recommendation</b>recommended_product · less_suited + reason codes · figures_shown · model_output · user_action (invested | asked | abandoned) · append only</div>
+      </div>
+    </div>
+    <div>
+      <div class="callouts mt2">
+        <div class="callout"><div class="dot">1</div><div><h3>Nothing ever overwrites a <code>Recommendation</code> row</h3><p>That makes it the compliance record and the metrics table at the same time. Which reasoning pattern converts and which one loses people can be answered from one table.</p></div></div>
+        <div class="callout"><div class="dot">2</div><div><h3><code>ProfileFact</code> appends, it never updates</h3><p>Goals and income are stored with a timestamp, and every change is a new row. That is what makes “what would change this” real. You can show someone their answer moved and the recommendation moved with it.</p></div></div>
+      </div>
+      <p class="cap mt3"><code>Listing.match_attribute</code> holds the single reason a listing came up for this user. It's the only thing the listing card shows.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Still open -->
+<section class="slide" data-sec="A13 Still open"><div class="kicker"><b>A13</b>Still open</div>
+  <h2>What I'm not claiming as fixed after testing</h2>
+  <p class="sub mt1">The rule I kept from the report: only describe an improvement as achieved after the change has been made <em>and retested</em>. These haven't been.</p>
+  <table class="mt3">
+    <tr><th style="width:12%">Priority</th><th style="width:40%">Problem</th><th>What a better outcome needs</th></tr>
+    <tr><td><span class="pill m">High</span></td><td>A required Shariah condition is never visibly confirmed</td><td>Verified product data and an explicit “unknown” state. Never imply a required condition is met when the app can't establish it.</td></tr>
+    <tr><td><span class="pill m">High</span></td><td>Ordinary risk questions fail (“Can I lose my money?”)</td><td>Recognise the common loss and access questions and answer them from approved content, without adding more questions to the intake.</td></tr>
+    <tr><td><span class="pill m">High</span></td><td>Portfolio facts shown before permission</td><td>Make the stated boundary match what's shown and used. Verify revocation separately.</td></tr>
+    <tr><td><span class="pill w">Medium</span></td><td>Earlier scenario cards recalculate after an amount edit</td><td>Preserve what was shown, or label the card as recalculating.</td></tr>
+    <tr><td><span class="pill s">To test</span></td><td>Confirmation, new holdings, concentration after purchase, reduced motion</td><td>Blocked or unverified in this run. Needs a proper test environment.</td></tr>
+  </table>
+</section>
+
+</div>
+<div id="notesbox"></div>
+<div id="hint">← → navigate · N notes · F fullscreen</div>
+<script>(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var stage = document.getElementById('stage');
+  var progress = document.getElementById('progress');
+  var notesbox = document.getElementById('notesbox');
+  var i = 0, showNotes = false;
+
+  function fit(){
+    var s = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+    stage.style.marginLeft = '-960px';
+    stage.style.marginTop = '-540px';
+    stage.style.transformOrigin = '50% 50%';
+    stage.style.transform = 'scale('+s+')';
+  }
+  function go(n){
+    if(n<0) n=0; if(n>slides.length-1) n=slides.length-1;
+    slides[i].classList.remove('active');
+    i=n; slides[i].classList.add('active');
+    location.hash = '#'+(i+1);
+    progress.style.width = ((i+1)/slides.length*100)+'%';
+    var nt = slides[i].querySelector('.notes');
+    notesbox.innerHTML = nt ? nt.innerHTML : '<span style="opacity:.5">No notes for this slide.</span>';
+    // lazy start video on slide
+    slides.forEach(function(s,k){ s.querySelectorAll('video').forEach(function(v){ if(k!==i) v.pause(); }); });
+  }
+  // number pages
+  slides.forEach(function(s,k){
+    if(!s.querySelector('.pageno')){ var p=document.createElement('div'); p.className='pageno'; p.textContent=(k+1<10?'0':'')+(k+1)+' / '+slides.length; s.appendChild(p); }
+    if(!s.querySelector('.brand') && !s.classList.contains('nobrand')){ var b=document.createElement('div'); b.className='brand'; b.textContent='AI Investment Advisor · Company X'; s.appendChild(b); }
+  });
+  // video slots: fill from VIDEOS config
+  var V = window.VIDEOS || {};
+  document.querySelectorAll('.video[data-key]').forEach(function(el){
+    var src = V[el.getAttribute('data-key')];
+    if(!src) return;
+    if(/youtube|youtu\.be|loom\.com|vimeo/.test(src)){
+      src = src.replace('watch?v=','embed/').replace('loom.com/share','loom.com/embed').replace('vimeo.com/','player.vimeo.com/video/');
+      el.innerHTML = '<iframe src="'+src+'" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+    } else {
+      var poster = el.getAttribute('data-poster');
+        el.innerHTML = '<video src="'+src+'" controls playsinline preload="metadata"'+(poster?' poster="'+poster+'"':'')+'></video>';
+    }
+  });
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'||e.key==='Enter'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(slides.length-1);}
+    else if(e.key==='n'||e.key==='N'){showNotes=!showNotes;notesbox.classList.toggle('show',showNotes);}
+    else if(e.key==='f'||e.key==='F'){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
+  });
+  document.addEventListener('click',function(e){
+    if(e.target.closest('a,button,video,iframe,#notesbox')) return;
+    if(e.clientX < window.innerWidth*0.15) go(i-1); else if(e.clientX > window.innerWidth*0.85) go(i+1);
+  });
+  window.addEventListener('resize',fit);
+  window.addEventListener('hashchange',function(){ var n=parseInt(location.hash.slice(1),10); if(n && n-1!==i) go(n-1); });
+  fit();
+  var start = parseInt((location.hash||'#1').slice(1),10)||1;
+  slides[0].classList.add('active'); go(start-1);
+})();
+</script>
+</body></html>
