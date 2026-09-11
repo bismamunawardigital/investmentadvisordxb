@@ -285,6 +285,9 @@ code{font-family:var(--mono);font-size:.92em;background:var(--surface-2);padding
 .logos.mini{gap:10px;margin-top:18px}
 .logos.mini>div{padding:8px 14px;font-size:15px;gap:8px}
 .logos.mini>div img{width:22px;height:22px}
+.links.hi{background:var(--indigo-soft);border-radius:18px;padding:22px 28px;gap:14px}
+.links.hi>div{font-size:20px}
+.links.hi a{color:var(--indigo);background:#fff;padding:4px 10px;border-radius:8px;text-decoration-thickness:2px}
 </style>
 <script>// Videos shown in the deck. Either a local file inside dist/assets/video/ or a YouTube / Loom / Vimeo link.
 // Leave a value empty ("") to keep the placeholder.
@@ -328,7 +331,7 @@ window.VIDEOS = {
       <div class="mt3" style="display:flex;gap:10px;flex-wrap:wrap">
         <span class="tag grey">Hybrid: guided flow + chat</span><span class="tag grey">Rules decide, AI explains</span><span class="tag grey">Costs in AED</span><span class="tag grey">Split and “not now” outcomes</span><span class="tag grey">Portfolio-aware, with consent</span>
       </div>
-      <div class="links mt3">
+      <div class="links mt3 hi">
         <div><span class="l">Fully wired prototype</span><a href="https://investmentadvisordxb.lovable.app/" target="_blank" rel="noopener">https://investmentadvisordxb.lovable.app/</a></div>
         <div><span class="l">Design system at Lovable</span><a href="https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ" target="_blank" rel="noopener">https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ</a></div>
       </div>
@@ -343,10 +346,11 @@ window.VIDEOS = {
 <section class="slide" data-sec="01 The product"><div class="kicker"><b>01</b>The product</div>
   <div class="body">
     <h2>Thirty seconds of the real thing</h2>
-    <p class="sub mt1">A quick look at the working prototype before we go back to the beginning.</p>
+    <p class="sub mt1">Press play for a quick look at the working prototype before we go back to the beginning.</p>
     <div class="video portrait mt3" data-key="hook" data-poster="assets/video/hook_poster.jpg" style="margin-left:auto;margin-right:auto;height:800px">
       <div class="ph"><div class="play"></div><h3>Short product clip</h3></div>
     </div>
+    <p class="cap mt2" style="text-align:center;font-size:18px;color:var(--ink-2)">Press play. 41 seconds, with sound.</p>
   </div>
   <div class="notes">Play the short clip. Narrate lightly: amount, questions, recommendation, invest. Live prototype: investmentadvisordxb.lovable.app</div>
 </section>
@@ -901,7 +905,7 @@ window.VIDEOS = {
         <div class="card soft" style="padding:22px 26px"><span class="n">New pieces for the advisor</span><p>Invitation card · one question per screen · thinking state · recommendation card · “the others, for later” · what would change this · suggested follow-ups · permission sheet</p></div>
       </div>
       <p class="cap mt3">One thing I dropped on purpose: a confidence meter. “What would change this” does the same job without pretending to be precise.</p>
-      <div class="links mt3">
+      <div class="links mt3 hi">
         <div><span class="l">Design system at Lovable</span><a href="https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ" target="_blank" rel="noopener">https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ</a></div>
         <div><span class="l">Fully wired prototype</span><a href="https://investmentadvisordxb.lovable.app/" target="_blank" rel="noopener">https://investmentadvisordxb.lovable.app/</a></div>
       </div>
@@ -1101,17 +1105,6 @@ window.VIDEOS = {
   <div class="notes">Set up the Daniel story here. The rules handled the timeline but not the medical reserve. That's what the synthetic testing found later.</div>
 </section>
 
-<!-- Full demo -->
-<section class="slide" data-sec="14 Prototype"><div class="kicker"><b>14</b>Prototype</div>
-  <div class="body">
-    <h2>The full walkthrough</h2>
-    <p class="sub mt1">Entry, questions, recommendation, listing, review. Then the split and the returning-user path.</p>
-    <div class="video mt3" data-key="demo" style="max-width:1500px;margin-left:auto;margin-right:auto">
-      <div class="ph"><div class="play"></div><h3>Full product demo</h3><p>drop file or link into src/videos.js → demo</p></div>
-    </div>
-  </div>
-  <div class="notes">Live prototype: investmentadvisordxb.lovable.app. Demo user menu: New / Returning with holdings / Reset. Bridge: "So I had a working prototype. Before user testing, I audited it properly, with Gemini as a second opinion."</div>
-</section>
 
 <!-- Divider -->
 <section class="slide divider nobrand">
@@ -1315,7 +1308,7 @@ window.VIDEOS = {
   <div class="body" style="gap:16px">
     <div style="display:flex;align-items:baseline;justify-content:space-between;gap:40px">
       <h2 style="font-size:30px;margin:0">GPT Astra live-testing the Lovable prototype as one of the synthetic users</h2>
-      <span class="tag" style="flex:none">Recording · 25 seconds · with sound</span>
+      <span class="tag" style="flex:none">Press play · 25 seconds · with sound</span>
     </div>
     <div class="video" data-key="astra" data-poster="assets/video/astra_poster.jpg" style="flex:1;aspect-ratio:auto;min-height:0">
       <div class="ph"><div class="play"></div><h3>GPT Astra live testing</h3><p>assets/video/astra.mp4</p></div>
@@ -1469,7 +1462,7 @@ window.VIDEOS = {
     <div>
       <h1>Here's what the testing made me change</h1>
       <div class="bridge">
-        <div><span class="l">Where I was</span><p>Six journeys, five themes, and one critical failure: the product had recommended investing money a person needed for a medical bill. I had a list of findings ranked by how much damage each one could do.</p></div>
+        <div><span class="l">Where I was</span><p>Six journeys and one critical failure: the product had recommended investing money a person needed for a medical bill. I had a list of findings ranked by how much damage each one could do.</p></div>
         <div><span class="l">So I did this</span><p>Four design changes, each one traced to a specific finding, plus a handful of smaller fixes. And a rule I borrowed from the test report: I only call something fixed if I changed it and then retested it.</p></div>
       </div>
     </div>
@@ -1575,7 +1568,7 @@ window.VIDEOS = {
     </div>
     <div class="phones"><div class="figure"><span class="ba after">After</span><div class="phone"><img src="assets/user/u_scenarios.png" alt="Relabelled scenario card"></div><div class="cap">Four outcomes, each with a sign. “Scenario, not a prediction” appears twice.</div></div></div>
   </div>
-  <p class="cap mt2">What I'm not claiming as fixed: the Shariah confirmation, ordinary risk questions like “Can I lose my money?”, and portfolio facts shown before permission. The full open list is in the appendix.</p>
+  <p class="cap mt2">What I'm not claiming as fixed: the Shariah confirmation, ordinary risk questions like “Can I lose my money?”, and portfolio facts shown before permission. Those are the next things I would fix.</p>
   <div class="notes">Bridge: "So that's where the product stands. Let me show you the whole thing end to end as it is today."</div>
 </section>
 
@@ -1734,7 +1727,7 @@ window.VIDEOS = {
     <h1 class="xl">Thank you</h1>
     <p class="lead" style="font-size:30px;color:var(--ink);margin-top:16px">By Bisma Munawar</p>
     <p class="lead sm mt2">Happy to take questions. The appendix is right behind this slide if you want the tables.</p>
-    <div class="links mt3">
+    <div class="links mt3 hi">
       <div><span class="l">Fully wired prototype</span><a href="https://investmentadvisordxb.lovable.app/" target="_blank" rel="noopener">https://investmentadvisordxb.lovable.app/</a></div>
       <div><span class="l">Design system at Lovable</span><a href="https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ" target="_blank" rel="noopener">https://lovable.dev/preview/SSdyFwH5GWbFI5OsCq1rGsGAj5h0nSpZ</a></div>
     </div>
@@ -1747,7 +1740,7 @@ window.VIDEOS = {
   <div class="body center">
     <div class="section-num">Appendix</div>
     <h1 class="xl">The reference tables</h1>
-    <p class="lead">Everything I kept out of the main story so it could flow. Research sources, the full competitor table, published facts, the hypothesis scorecard, Kano detail, all 22 checks, the 12-area scorecard, the data model and the list of what is still open.</p>
+    <p class="lead">Everything I kept out of the main story so it could flow. Research sources, the full competitor table, published facts, the hypothesis scorecard, Kano detail, all 22 checks, the 12-area scorecard and the data model.</p>
   </div>
 </section>
 
@@ -1972,20 +1965,6 @@ window.VIDEOS = {
       <p class="cap mt3"><code>Listing.match_attribute</code> holds the single reason a listing came up for this user. It's the only thing the listing card shows.</p>
     </div>
   </div>
-</section>
-
-<!-- Still open -->
-<section class="slide" data-sec="A13 Still open"><div class="kicker"><b>A13</b>Still open</div>
-  <h2>What I'm not claiming as fixed after testing</h2>
-  <p class="sub mt1">The rule I kept from the report: only describe an improvement as achieved after the change has been made <em>and retested</em>. These haven't been.</p>
-  <table class="mt3">
-    <tr><th style="width:12%">Priority</th><th style="width:40%">Problem</th><th>What a better outcome needs</th></tr>
-    <tr><td><span class="pill m">High</span></td><td>A required Shariah condition is never visibly confirmed</td><td>Verified product data and an explicit “unknown” state. Never imply a required condition is met when the app can't establish it.</td></tr>
-    <tr><td><span class="pill m">High</span></td><td>Ordinary risk questions fail (“Can I lose my money?”)</td><td>Recognise the common loss and access questions and answer them from approved content, without adding more questions to the intake.</td></tr>
-    <tr><td><span class="pill m">High</span></td><td>Portfolio facts shown before permission</td><td>Make the stated boundary match what's shown and used. Verify revocation separately.</td></tr>
-    <tr><td><span class="pill w">Medium</span></td><td>Earlier scenario cards recalculate after an amount edit</td><td>Preserve what was shown, or label the card as recalculating.</td></tr>
-    <tr><td><span class="pill s">To test</span></td><td>Confirmation, new holdings, concentration after purchase, reduced motion</td><td>Blocked or unverified in this run. Needs a proper test environment.</td></tr>
-  </table>
 </section>
 
 </div>
